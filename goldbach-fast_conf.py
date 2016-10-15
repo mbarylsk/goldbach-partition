@@ -50,10 +50,17 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 10000000
+max_num = 1000000
 
 # Checkpoint value when partial results are drawn/displayed
 checkpoint_value = 20000
+
+# Caching previous primality results
+caching_primality_results = False
+
+# Algorithms to be checked
+algo_to_check = {'a1', 'a2', 'a3', 'a4', 'a5', 'a6'}
+
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
@@ -149,10 +156,11 @@ def is_prime (n):
             break
         i += 6
 
-    if result:
-        add_to_prime_set (n)
-    else:
-        add_to_nonprime_set (n)
+    if caching_primality_results:
+        if result:
+            add_to_prime_set (n)
+        else:
+            add_to_nonprime_set (n)
     return result
 
 def get_ith_prime (i):
@@ -176,6 +184,13 @@ def delta_variable (iteration):
         delta = 2
     return delta
 
+def delta_prime (iteration):
+    if iteration == 0:
+        delta = 0
+    else:
+        delta = get_ith_prime(iteration + 1) - get_ith_prime(iteration)
+    return delta
+
 def search_for_partition (p1, p2, delta):
     found = False
     iteration = 0
@@ -193,42 +208,33 @@ def search_for_partition (p1, p2, delta):
     duration = time.time() - startTime
     return p1, p2, duration, iteration
 
-def search_for_partition2 (p1, p2):
-    found = False
-    iteration = 0
-    n = p1 + p2
-    startTime = time.time()
-    while (not found):
-        iteration += 1
-        if (is_prime (p1) and is_prime(p2)):
-            found = True
-        if (not found):
-            p1 = get_ith_prime (iteration)
-            p2 = n - p1
-        if p1 < 2 or p2 < 2:
-            raise ("Could not find GP")
-    duration = time.time() - startTime
-    return p1, p2, duration, iteration
-
 #############################################################
 # Presentation
 #############################################################
 
-def write_results_to_figures (directory, last_loop):
+def write_results_to_figures (directory):
     # results - figures    
     plt.figure(1)
-    plt.plot(list_checkpoints, list_checkpoints_duration_a1, 'g.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_duration_a2, 'r.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_duration_a2, 'b.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_duration_a4, 'y.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_duration_a5, 'c.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_duration_a6, 'm.', ms=2)
     g_patch = mpatches.Patch(color='green', label='A1')
     r_patch = mpatches.Patch(color='red', label='A2')
     b_patch = mpatches.Patch(color='blue', label='A3')
     y_patch = mpatches.Patch(color='yellow', label='A4')
     c_patch = mpatches.Patch(color='cyan', label='A5')
     m_patch = mpatches.Patch(color='magenta', label='A6')
+    
+    if 'a1' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration_a1, 'g.', ms=2)
+    if 'a2' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration_a2, 'r.', ms=2)
+    if 'a3' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration_a2, 'b.', ms=2)
+    if 'a4' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration_a4, 'y.', ms=2)
+    if 'a5' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration_a5, 'c.', ms=2)
+    if 'a6' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration_a6, 'm.', ms=2)
+
     plt.legend(handles=[g_patch, r_patch, b_patch, y_patch, c_patch, m_patch], loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('Number')
     plt.ylabel('Time [s]')
@@ -237,18 +243,19 @@ def write_results_to_figures (directory, last_loop):
     plt.savefig(directory + "/f_checkpoint_duration_alg.png")
 
     plt.figure(2)
-    plt.plot(list_checkpoints, list_checkpoints_iters_a1, 'g.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_iters_a2, 'r.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_iters_a3, 'b.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_iters_a4, 'y.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_iters_a5, 'c.', ms=2)
-    plt.plot(list_checkpoints, list_checkpoints_iters_a6, 'm.', ms=2)
-    g_patch = mpatches.Patch(color='green', label='A1')
-    r_patch = mpatches.Patch(color='red', label='A2')
-    b_patch = mpatches.Patch(color='blue', label='A3')
-    y_patch = mpatches.Patch(color='yellow', label='A4')
-    c_patch = mpatches.Patch(color='cyan', label='A5')
-    m_patch = mpatches.Patch(color='magenta', label='A6')
+    if 'a1' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_iters_a1, 'g.', ms=2)
+    if 'a2' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_iters_a2, 'r.', ms=2)
+    if 'a3' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_iters_a3, 'b.', ms=2)
+    if 'a4' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_iters_a4, 'y.', ms=2)
+    if 'a5' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_iters_a5, 'c.', ms=2)
+    if 'a6' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_iters_a6, 'm.', ms=2)
+
     plt.legend(handles=[g_patch, r_patch, b_patch, y_patch, c_patch, m_patch], loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('Number')
     plt.ylabel('Iterations')
@@ -287,6 +294,43 @@ class TestPrimeMethods(unittest.TestCase):
         self.assertEqual(get_ith_prime(0), 2)
         self.assertEqual(get_ith_prime(1), 3)
         self.assertEqual(get_ith_prime(2), 5)
+
+    def test_search_for_partition_a1(self):
+        (p1, p2, duration, iterations) = search_for_partition (5, 7, lambda iteration: delta_constant_minus(iteration))
+        self.assertEqual (p1, 5)
+        self.assertEqual (p2, 7)
+        self.assertEqual (iterations, 1)
+        (p1, p2, duration, iterations) = search_for_partition (7, 9, lambda iteration: delta_constant_minus(iteration))
+        self.assertEqual (p1, 5)
+        self.assertEqual (p2, 11)
+        self.assertEqual (iterations, 2)
+
+    def test_search_for_partition_a2(self):
+        (p1, p2, duration, iterations) = search_for_partition (3, 7, lambda iteration: delta_constant_plus(iteration))
+        self.assertEqual (p1, 3)
+        self.assertEqual (p2, 7)
+        self.assertEqual (iterations, 1)
+        (p1, p2, duration, iterations) = search_for_partition (3, 9, lambda iteration: delta_constant_plus(iteration))
+        self.assertEqual (p1, 5)
+        self.assertEqual (p2, 7)
+        self.assertEqual (iterations, 2)
+
+    def test_search_for_partition_a6(self):
+        global set_prime
+        global list_sorted_prime
+        set_prime.add (2)
+        set_prime.add (3)
+        set_prime.add (5)
+        set_prime.add (7)
+        list_sorted_prime = sorted (set_prime)
+        (p1, p2, duration, iterations) = search_for_partition (3, 5, lambda iteration: delta_prime(iteration))
+        self.assertEqual (p1, 3)
+        self.assertEqual (p2, 5)
+        self.assertEqual (iterations, 1)
+        (p1, p2, duration, iterations) = search_for_partition (3, 9, lambda iteration: delta_prime(iteration))
+        self.assertEqual (p1, 5)
+        self.assertEqual (p2, 7)
+        self.assertEqual (iterations, 2)
 
 #############################################################
 # Main - unit tests
@@ -330,112 +374,119 @@ for k in range (min_num, max_num):
 
     list_nums.append (num)
 
-    #print ("A1")
     # algorithm 1
     # start from half of n - the smallest possible difference between primes
-    p1 = num / 2
-    if p1 % 2 == 0:
-        p1 = p1 - 1
-        p2 = p1 + 2
-    else:
-        p2 = p1
+    if 'a1' in algo_to_check:
+        p1 = num / 2
+        if p1 % 2 == 0:
+            p1 = p1 - 1
+            p2 = p1 + 2
+        else:
+            p2 = p1
 
-    (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
-    dt_diff1 += duration
-    dt_iter1 += iterations
+        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_minus(iteration))
+        dt_diff1 += duration
+        dt_iter1 += iterations
 
-    if p1 + p2 != num:
-        print ("Alg #1: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+        if p1 + p2 != num:
+            print ("Alg #1: violation of sum for p1=", p1, "p2=", p2, "n=", num)
 
-    #print ("A2")
     # algorithm 2
     # start from the biggest possible difference between primes
-    p1 = 3
-    p2 = num - 3
+    if 'a2' in algo_to_check:
+        p1 = 3
+        p2 = num - 3
 
-    (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
-    dt_diff2 += duration
-    dt_iter2 += iterations
+        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
+        dt_diff2 += duration
+        dt_iter2 += iterations
 
-    if p1 + p2 != num:
-        print ("Alg #2: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+        if p1 + p2 != num:
+            print ("Alg #2: violation of sum for p1=", p1, "p2=", p2, "n=", num)
 
-    #print ("A3")
     # algorithm 3
     # start from 1/3 of n
-    p1 = int(num / 3)
-    p2 = num - p1
-    if p1 % 2 == 0:
-        p1 = p1 - 1
-        p2 = p2 + 1
+    if 'a3' in algo_to_check:
+        p1 = int(num / 3)
+        p2 = num - p1
+        if p1 % 2 == 0:
+            p1 = p1 - 1
+            p2 = p2 + 1
 
-    (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
-    dt_diff3 += duration
-    dt_iter3 += iterations
+        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_minus(iteration))
+        dt_diff3 += duration
+        dt_iter3 += iterations
 
-    if p1 + p2 != num:
-        print ("Alg #3: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+        if p1 + p2 != num:
+            print ("Alg #3: violation of sum for p1=", p1, "p2=", p2, "n=", num)
 
-    #print ("A4")
     # algorithm 4
     # start from the biggest possible difference between primes
-    p1 = 5
-    p2 = num - 5
+    if 'a4' in algo_to_check:
+        p1 = 5
+        p2 = num - 5
 
-    (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
-    dt_diff4 += duration
-    dt_iter4 += iterations
+        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
+        dt_diff4 += duration
+        dt_iter4 += iterations
 
-    if p1 + p2 != num:
-        print ("Alg #4: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+        if p1 + p2 != num:
+            print ("Alg #4: violation of sum for p1=", p1, "p2=", p2, "n=", num)
 
-    #print ("A5")
     # algorithm 5
     # start from the biggest possible difference between primes
-    p1 = 5
-    p2 = num - 5
+    if 'a5' in algo_to_check:
+        p1 = 5
+        p2 = num - 5
 
-    (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_variable(iteration))
-    dt_diff5 += duration
-    dt_iter5 += iterations
+        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_variable(iteration))
+        dt_diff5 += duration
+        dt_iter5 += iterations
 
-    if p1 + p2 != num:
-        print ("Alg #5: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+        if p1 + p2 != num:
+            print ("Alg #5: violation of sum for p1=", p1, "p2=", p2, "n=", num)
 
-    #print ("A6")
     # algorithm 6
     # A2 but next p1 is always prime
-    p1 = 3
-    p2 = num - 3
+    if 'a6' in algo_to_check:
+        p1 = 3
+        p2 = num - 3
 
-    (p1, p2, duration, iterations) = search_for_partition2 (p1, p2)
-    dt_diff6 += duration
-    dt_iter6 += iterations
+        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_prime(iteration))
+        dt_diff6 += duration
+        dt_iter6 += iterations
 
-    if p1 + p2 != num:
-        print ("Alg #6: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+        if p1 + p2 != num:
+            print ("Alg #6: violation of sum for p1=", p1, "p2=", p2, "n=", num)
     
     # checkpoint - partial results
     if num % checkpoint_value == 0:
         dt_current = datetime.now()
         dt_diff_current = (dt_current - dt_current_previous).total_seconds()
         list_checkpoints.append(num)
-        list_checkpoints_duration_a1.append(dt_diff1)
-        list_checkpoints_duration_a2.append(dt_diff2)
-        list_checkpoints_duration_a3.append(dt_diff3)
-        list_checkpoints_duration_a4.append(dt_diff4)
-        list_checkpoints_duration_a5.append(dt_diff5)
-        list_checkpoints_duration_a6.append(dt_diff6)
-        list_checkpoints_iters_a1.append(dt_iter1)
-        list_checkpoints_iters_a2.append(dt_iter2)
-        list_checkpoints_iters_a3.append(dt_iter3)
-        list_checkpoints_iters_a4.append(dt_iter4)
-        list_checkpoints_iters_a5.append(dt_iter5)
-        list_checkpoints_iters_a6.append(dt_iter6)
+        if 'a1' in algo_to_check:
+            list_checkpoints_duration_a1.append(dt_diff1)
+            list_checkpoints_iters_a1.append(dt_iter1)
+        if 'a2' in algo_to_check:
+            list_checkpoints_duration_a2.append(dt_diff2)
+            list_checkpoints_iters_a2.append(dt_iter2)
+        if 'a3' in algo_to_check:
+            list_checkpoints_duration_a3.append(dt_diff3)
+            list_checkpoints_iters_a3.append(dt_iter3)
+        if 'a4' in algo_to_check:
+            list_checkpoints_duration_a4.append(dt_diff4)
+            list_checkpoints_iters_a4.append(dt_iter4)
+        if 'a5' in algo_to_check:
+            list_checkpoints_duration_a5.append(dt_diff5)
+            list_checkpoints_iters_a5.append(dt_iter5)
+        if 'a6' in algo_to_check:
+            list_checkpoints_duration_a6.append(dt_diff6)
+            list_checkpoints_iters_a6.append(dt_iter6)
+
         print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds")
         
         # remember results so far
-        write_results_to_figures (directory, False)
+        write_results_to_figures (directory)
 
 dt_end = datetime.now()
 
@@ -444,4 +495,4 @@ dt_diff = dt_end - dt_start
 print ("Total calculations lasted:", dt_diff)
 
 # final results - figures
-write_results_to_figures (directory, True)
+write_results_to_figures (directory)
