@@ -40,7 +40,7 @@ import time
 #############################################################
 
 # Run unit tests
-#   o True - run unit tests
+#   o True  - run unit tests
 #   o False - run main program
 run_unit_tests = False
 
@@ -50,12 +50,16 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 1000000
+max_num = 200000000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 20000
+checkpoint_value = 50000
 
 # Caching previous primality results
+#   o True  - auxilary sets of primes and composite numbers will grow
+#             it will speed up further primality tests but more RAM will
+#             be occupied
+#   o False - do not cache new primality test results
 caching_primality_results = False
 
 # Algorithms to be checked
