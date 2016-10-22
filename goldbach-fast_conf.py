@@ -90,18 +90,11 @@ set_nonprime = set ()
 list_nums = []
 list_sorted_prime = []
 
-list_checkpoints_duration_a1 = []
-list_checkpoints_duration_a2 = []
-list_checkpoints_duration_a3 = []
-list_checkpoints_duration_a4 = []
-list_checkpoints_duration_a5 = []
-list_checkpoints_duration_a6 = []
-list_checkpoints_iters_a1 = []
-list_checkpoints_iters_a2 = []
-list_checkpoints_iters_a3 = []
-list_checkpoints_iters_a4 = []
-list_checkpoints_iters_a5 = []
-list_checkpoints_iters_a6 = []
+dt_diff = [0, 0, 0, 0, 0, 0]
+dt_iter = [0, 0, 0, 0, 0, 0]
+
+list_checkpoints_duration = [[], [], [], [], [], []]
+list_checkpoints_iters = [[], [], [], [], [], []]
 list_checkpoints = []
 
 def init_set (filename, is_prime):
@@ -225,21 +218,28 @@ def write_results_to_figures (directory):
     y_patch = mpatches.Patch(color='yellow', label='A4')
     c_patch = mpatches.Patch(color='cyan', label='A5')
     m_patch = mpatches.Patch(color='magenta', label='A6')
-    
-    if 'a1' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_duration_a1, 'g.', ms=2)
-    if 'a2' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_duration_a2, 'r.', ms=2)
-    if 'a3' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_duration_a2, 'b.', ms=2)
-    if 'a4' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_duration_a4, 'y.', ms=2)
-    if 'a5' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_duration_a5, 'c.', ms=2)
-    if 'a6' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_duration_a6, 'm.', ms=2)
 
-    plt.legend(handles=[g_patch, r_patch, b_patch, y_patch, c_patch, m_patch], loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    list_of_handles = []
+    if 'a1' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration[0], 'g.', ms=2)
+        list_of_handles.append(g_patch)
+    if 'a2' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration[1], 'r.', ms=2)
+        list_of_handles.append(r_patch)
+    if 'a3' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration[2], 'b.', ms=2)
+        list_of_handles.append(b_patch)
+    if 'a4' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration[3], 'y.', ms=2)
+        list_of_handles.append(y_patch)
+    if 'a5' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration[4], 'c.', ms=2)
+        list_of_handles.append(c_patch)
+    if 'a6' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration[5], 'm.', ms=2)
+        list_of_handles.append(m_patch)
+
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('Number')
     plt.ylabel('Time [s]')
     plt.title('Duration of total calculations')
@@ -248,19 +248,19 @@ def write_results_to_figures (directory):
 
     plt.figure(2)
     if 'a1' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_iters_a1, 'g.', ms=2)
+        plt.plot(list_checkpoints, list_checkpoints_iters[0], 'g.', ms=2)
     if 'a2' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_iters_a2, 'r.', ms=2)
+        plt.plot(list_checkpoints, list_checkpoints_iters[1], 'r.', ms=2)
     if 'a3' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_iters_a3, 'b.', ms=2)
+        plt.plot(list_checkpoints, list_checkpoints_iters[2], 'b.', ms=2)
     if 'a4' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_iters_a4, 'y.', ms=2)
+        plt.plot(list_checkpoints, list_checkpoints_iters[3], 'y.', ms=2)
     if 'a5' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_iters_a5, 'c.', ms=2)
+        plt.plot(list_checkpoints, list_checkpoints_iters[4], 'c.', ms=2)
     if 'a6' in algo_to_check:
-        plt.plot(list_checkpoints, list_checkpoints_iters_a6, 'm.', ms=2)
+        plt.plot(list_checkpoints, list_checkpoints_iters[5], 'm.', ms=2)
 
-    plt.legend(handles=[g_patch, r_patch, b_patch, y_patch, c_patch, m_patch], loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('Number')
     plt.ylabel('Iterations')
     plt.title('Total iterations')
@@ -358,20 +358,6 @@ print ("DONE")
 dt_start = datetime.now()
 dt_current_previous = dt_start
 
-dt_diff1 = 0
-dt_diff2 = 0
-dt_diff3 = 0
-dt_diff4 = 0
-dt_diff5 = 0
-dt_diff6 = 0
-
-dt_iter1 = 0
-dt_iter2 = 0
-dt_iter3 = 0
-dt_iter4 = 0
-dt_iter5 = 0
-dt_iter6 = 0
-
 # new calculations
 for k in range (min_num, max_num):
     num = step_factor*k
@@ -389,8 +375,8 @@ for k in range (min_num, max_num):
             p2 = p1
 
         (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_minus(iteration))
-        dt_diff1 += duration
-        dt_iter1 += iterations
+        dt_diff[0] += duration
+        dt_iter[0] += iterations
 
         if p1 + p2 != num:
             print ("Alg #1: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -402,8 +388,8 @@ for k in range (min_num, max_num):
         p2 = num - 3
 
         (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
-        dt_diff2 += duration
-        dt_iter2 += iterations
+        dt_diff[1] += duration
+        dt_iter[1] += iterations
 
         if p1 + p2 != num:
             print ("Alg #2: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -418,8 +404,8 @@ for k in range (min_num, max_num):
             p2 = p2 + 1
 
         (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_minus(iteration))
-        dt_diff3 += duration
-        dt_iter3 += iterations
+        dt_diff[2] += duration
+        dt_iter[2] += iterations
 
         if p1 + p2 != num:
             print ("Alg #3: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -431,8 +417,8 @@ for k in range (min_num, max_num):
         p2 = num - 5
 
         (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
-        dt_diff4 += duration
-        dt_iter4 += iterations
+        dt_diff[3] += duration
+        dt_iter[3] += iterations
 
         if p1 + p2 != num:
             print ("Alg #4: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -444,8 +430,8 @@ for k in range (min_num, max_num):
         p2 = num - 5
 
         (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_variable(iteration))
-        dt_diff5 += duration
-        dt_iter5 += iterations
+        dt_diff[4] += duration
+        dt_iter[4] += iterations
 
         if p1 + p2 != num:
             print ("Alg #5: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -457,8 +443,8 @@ for k in range (min_num, max_num):
         p2 = num - 3
 
         (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_prime(iteration))
-        dt_diff6 += duration
-        dt_iter6 += iterations
+        dt_diff[5] += duration
+        dt_iter[5] += iterations
 
         if p1 + p2 != num:
             print ("Alg #6: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -469,23 +455,23 @@ for k in range (min_num, max_num):
         dt_diff_current = (dt_current - dt_current_previous).total_seconds()
         list_checkpoints.append(num)
         if 'a1' in algo_to_check:
-            list_checkpoints_duration_a1.append(dt_diff1)
-            list_checkpoints_iters_a1.append(dt_iter1)
+            list_checkpoints_duration[0].append(dt_diff[0])
+            list_checkpoints_iters[0].append(dt_iter[0])
         if 'a2' in algo_to_check:
-            list_checkpoints_duration_a2.append(dt_diff2)
-            list_checkpoints_iters_a2.append(dt_iter2)
+            list_checkpoints_duration[1].append(dt_diff[1])
+            list_checkpoints_iters[1].append(dt_iter[1])
         if 'a3' in algo_to_check:
-            list_checkpoints_duration_a3.append(dt_diff3)
-            list_checkpoints_iters_a3.append(dt_iter3)
+            list_checkpoints_duration[2].append(dt_diff[2])
+            list_checkpoints_iters[2].append(dt_iter[2])
         if 'a4' in algo_to_check:
-            list_checkpoints_duration_a4.append(dt_diff4)
-            list_checkpoints_iters_a4.append(dt_iter4)
+            list_checkpoints_duration[3].append(dt_diff[3])
+            list_checkpoints_iters[3].append(dt_iter[3])
         if 'a5' in algo_to_check:
-            list_checkpoints_duration_a5.append(dt_diff5)
-            list_checkpoints_iters_a5.append(dt_iter5)
+            list_checkpoints_duration[4].append(dt_diff[4])
+            list_checkpoints_iters[4].append(dt_iter[4])
         if 'a6' in algo_to_check:
-            list_checkpoints_duration_a6.append(dt_diff6)
-            list_checkpoints_iters_a6.append(dt_iter6)
+            list_checkpoints_duration[5].append(dt_diff[5])
+            list_checkpoints_iters[5].append(dt_iter[5])
 
         print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds")
         
