@@ -79,6 +79,21 @@ if not run_unit_tests:
     directory = str(step_factor*max_num)
     if not os.path.exists(directory):
         os.makedirs(directory)
+    algo = ""
+    if 'a1' in algo_to_check:
+        algo += "a1"
+    if 'a2' in algo_to_check:
+        algo += "a2"
+    if 'a3' in algo_to_check:
+        algo += "a3"
+    if 'a4' in algo_to_check:
+        algo += "a4"
+    if 'a5' in algo_to_check:
+        algo += "a5"
+    if 'a6' in algo_to_check:
+        algo += "a6"
+    file_output_iters_alg = directory + "/f_checkpoint_iters_alg" + algo + ".png"
+    file_output_duration_alg = directory + "/f_checkpoint_duration_alg" + algo + ".png"
 
 #############################################################
 # Business logic
@@ -244,7 +259,7 @@ def write_results_to_figures (directory):
     plt.ylabel('Time [s]')
     plt.title('Duration of total calculations')
     plt.grid(True)
-    plt.savefig(directory + "/f_checkpoint_duration_alg.png")
+    plt.savefig(file_output_duration_alg)
 
     plt.figure(2)
     if 'a1' in algo_to_check:
@@ -265,7 +280,7 @@ def write_results_to_figures (directory):
     plt.ylabel('Iterations')
     plt.title('Total iterations')
     plt.grid(True)
-    plt.savefig(directory + "/f_checkpoint_iters_alg.png")
+    plt.savefig(file_output_iters_alg)
 
 #############################################################
 # Unit tests
