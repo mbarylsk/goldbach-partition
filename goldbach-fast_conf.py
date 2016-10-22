@@ -53,7 +53,7 @@ step_factor = 2
 max_num = 200000000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 50000
+checkpoint_value = 200000
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -488,7 +488,8 @@ for k in range (min_num, max_num):
             list_checkpoints_duration[5].append(dt_diff[5])
             list_checkpoints_iters[5].append(dt_iter[5])
 
-        print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds")
+        perc_completed = str(int(k * 100 / max_num))
+        print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
         
         # remember results so far
         write_results_to_figures (directory)
