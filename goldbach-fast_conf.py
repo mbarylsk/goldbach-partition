@@ -50,10 +50,10 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 200000000
+max_num = 200000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 200000
+checkpoint_value = 2000
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -123,9 +123,9 @@ def init_set (filename, is_prime):
             numbers = line.split(',')
             for number in numbers:
                 if is_prime:
-                    set_prime.add(int(number))
+                    add_to_prime_set(int(number))
                 else:
-                    set_nonprime.add(int(number))
+                    add_to_nonprime_set(int(number))
 
 def is_in_prime_set (n):
     global set_prime
