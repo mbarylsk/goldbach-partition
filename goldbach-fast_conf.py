@@ -34,15 +34,13 @@ import numpy as np
 import os
 from datetime import datetime
 import time
+import numpy
+import goldbach
+import primes
 
 #############################################################
 # Settings - configuration
 #############################################################
-
-# Run unit tests
-#   o True  - run unit tests
-#   o False - run main program
-run_unit_tests = False
 
 # Minimal even number checked against Goldbach conjecture
 #   o number = min_num * step_factor
@@ -50,10 +48,10 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 200000
+max_num = 20000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 2000
+checkpoint_value = 200
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -75,35 +73,30 @@ file_input_nonprimes = 't_nonprime_numbers.txt'
 # Settings - output directory and files
 #############################################################
 
-if not run_unit_tests:
-    directory = str(step_factor*max_num)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    algo = ""
-    if 'a1' in algo_to_check:
-        algo += "a1"
-    if 'a2' in algo_to_check:
-        algo += "a2"
-    if 'a3' in algo_to_check:
-        algo += "a3"
-    if 'a4' in algo_to_check:
-        algo += "a4"
-    if 'a5' in algo_to_check:
-        algo += "a5"
-    if 'a6' in algo_to_check:
-        algo += "a6"
-    file_output_iters_alg = directory + "/f_checkpoint_iters_alg" + algo + ".png"
-    file_output_duration_alg = directory + "/f_checkpoint_duration_alg" + algo + ".png"
+directory = str(step_factor*max_num)
+if not os.path.exists(directory):
+    os.makedirs(directory)
+algo = ""
+if 'a1' in algo_to_check:
+    algo += "a1"
+if 'a2' in algo_to_check:
+    algo += "a2"
+if 'a3' in algo_to_check:
+    algo += "a3"
+if 'a4' in algo_to_check:
+    algo += "a4"
+if 'a5' in algo_to_check:
+    algo += "a5"
+if 'a6' in algo_to_check:
+    algo += "a6"
+file_output_iters_alg = directory + "/f_checkpoint_iters_alg" + algo + ".png"
+file_output_duration_alg = directory + "/f_checkpoint_duration_alg" + algo + ".png"
 
 #############################################################
 # Business logic
 #############################################################
 
-set_prime = set ()
-set_nonprime = set ()
-
 list_nums = []
-list_sorted_prime = []
 
 dt_diff = [0, 0, 0, 0, 0, 0]
 dt_iter = [0, 0, 0, 0, 0, 0]
@@ -111,114 +104,6 @@ dt_iter = [0, 0, 0, 0, 0, 0]
 list_checkpoints_duration = [[], [], [], [], [], []]
 list_checkpoints_iters = [[], [], [], [], [], []]
 list_checkpoints = []
-
-def init_set (filename, is_prime):
-    global list_sorted_prime
-    if os.path.exists(filename):
-        f = open(filename, "r")
-        lines = f.readlines()
-        for line in lines:
-            line = line.replace('[', '')
-            line = line.replace(']', '')
-            numbers = line.split(',')
-            for number in numbers:
-                if is_prime:
-                    add_to_prime_set(int(number))
-                else:
-                    add_to_nonprime_set(int(number))
-
-def is_in_prime_set (n):
-    global set_prime
-    if n in set_prime:
-        return True
-    else:
-        return False
-
-def is_in_nonprime_set (n):
-    global set_nonprime
-    if n in set_nonprime:
-        return True
-    else:
-        return False
-
-def add_to_prime_set (n):
-    global set_prime
-    set_prime.add(n)
-
-def add_to_nonprime_set (n):
-    global set_nonprime
-    set_nonprime.add(n)
-
-def is_prime (n):
-    if n == 1:
-        return False
-    elif n == 2 or n == 3:
-        return True
-    elif is_in_prime_set (n):
-        return True
-    elif is_in_nonprime_set (n):
-        return False
-    elif n % 2 == 0 or n % 3 == 0:
-        return False
-    result = True
-    i = 5
-    while i*i <= n:
-        if n %  i == 0 or n % (i + 2) == 0:
-            result = False
-            break
-        i += 6
-
-    if caching_primality_results:
-        if result:
-            add_to_prime_set (n)
-        else:
-            add_to_nonprime_set (n)
-    return result
-
-def get_ith_prime (i):
-    global list_sorted_prime
-    return list_sorted_prime[i]
-
-def delta_constant_plus (iteration):
-    return 2
-
-def delta_constant_minus (iteration):
-    return -2
-
-def delta_variable (iteration):
-    if iteration == 0:
-        delta = 0
-    elif iteration == 1:
-        delta = 2
-    elif iteration == 2:
-        delta = -4
-    elif iteration > 2:
-        delta = 2
-    return delta
-
-def delta_prime (iteration):
-    if iteration == 0:
-        delta = 0
-    else:
-        delta = get_ith_prime(iteration + 1) - get_ith_prime(iteration)
-    return delta
-
-def search_for_partition (p1, p2, delta):
-    found = False
-    iteration = 0
-
-    startTime = time.time()
-    while (not found):
-        iteration += 1
-        if (is_prime (p1) and is_prime(p2)):
-            found = True
-        if (not found):
-            p1 = p1 + delta (iteration)
-            p2 = p2 - delta (iteration)
-        if p2 < 2 or p1 < 2:
-            raise ("Could not find GP")
-    duration = time.time() - startTime
-    return p1, p2, duration, iteration
 
 #############################################################
 # Presentation
@@ -283,91 +168,19 @@ def write_results_to_figures (directory):
     plt.savefig(file_output_iters_alg)
 
 #############################################################
-# Unit tests
-#############################################################
-
-class TestPrimeMethods(unittest.TestCase):
-    def test_isprime(self):
-        self.assertTrue(is_prime(2))
-        self.assertTrue(is_prime(3))
-        self.assertTrue(is_prime(5))
-        self.assertTrue(is_prime(7))
-        self.assertTrue(is_prime(11))
-
-    def test_isnotprime(self):
-        self.assertFalse(is_prime(1))
-        self.assertFalse(is_prime(4))
-        self.assertFalse(is_prime(6))
-        self.assertFalse(is_prime(8))
-        self.assertFalse(is_prime(10))
-        self.assertFalse(is_prime(3379995))
-
-    def test_get_ith_prime(self):
-        global set_prime
-        global list_sorted_prime
-        set_prime.add (2)
-        set_prime.add (3)
-        set_prime.add (5)
-        set_prime.add (7)
-        list_sorted_prime = sorted (set_prime)
-        self.assertEqual(get_ith_prime(0), 2)
-        self.assertEqual(get_ith_prime(1), 3)
-        self.assertEqual(get_ith_prime(2), 5)
-
-    def test_search_for_partition_a1(self):
-        (p1, p2, duration, iterations) = search_for_partition (5, 7, lambda iteration: delta_constant_minus(iteration))
-        self.assertEqual (p1, 5)
-        self.assertEqual (p2, 7)
-        self.assertEqual (iterations, 1)
-        (p1, p2, duration, iterations) = search_for_partition (7, 9, lambda iteration: delta_constant_minus(iteration))
-        self.assertEqual (p1, 5)
-        self.assertEqual (p2, 11)
-        self.assertEqual (iterations, 2)
-
-    def test_search_for_partition_a2(self):
-        (p1, p2, duration, iterations) = search_for_partition (3, 7, lambda iteration: delta_constant_plus(iteration))
-        self.assertEqual (p1, 3)
-        self.assertEqual (p2, 7)
-        self.assertEqual (iterations, 1)
-        (p1, p2, duration, iterations) = search_for_partition (3, 9, lambda iteration: delta_constant_plus(iteration))
-        self.assertEqual (p1, 5)
-        self.assertEqual (p2, 7)
-        self.assertEqual (iterations, 2)
-
-    def test_search_for_partition_a6(self):
-        global set_prime
-        global list_sorted_prime
-        set_prime.add (2)
-        set_prime.add (3)
-        set_prime.add (5)
-        set_prime.add (7)
-        list_sorted_prime = sorted (set_prime)
-        (p1, p2, duration, iterations) = search_for_partition (3, 5, lambda iteration: delta_prime(iteration))
-        self.assertEqual (p1, 3)
-        self.assertEqual (p2, 5)
-        self.assertEqual (iterations, 1)
-        (p1, p2, duration, iterations) = search_for_partition (3, 9, lambda iteration: delta_prime(iteration))
-        self.assertEqual (p1, 5)
-        self.assertEqual (p2, 7)
-        self.assertEqual (iterations, 2)
-
-#############################################################
-# Main - unit tests
-#############################################################
-
-if run_unit_tests:
-    unittest.main()
-
-#############################################################
 # Main
 #############################################################
 
+print ("Initialize objects...")
+p = primes.Primes(caching_primality_results)
+gp = goldbach.GoldbachPartition (p)
+
 print ("Loading helper sets...")
-init_set(file_input_primes, True)
-init_set(file_input_nonprimes, False)
+p.init_set(file_input_primes, True)
+p.init_set(file_input_nonprimes, False)
 print ("DONE")
 print ("Sorting primes...")
-list_sorted_prime = sorted(list(set_prime))
+p.sort_prime_set()
 print ("DONE")
 
 dt_start = datetime.now()
@@ -389,7 +202,7 @@ for k in range (min_num, max_num):
         else:
             p2 = p1
 
-        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_minus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_minus(iteration))
         dt_diff[0] += duration
         dt_iter[0] += iterations
 
@@ -402,7 +215,7 @@ for k in range (min_num, max_num):
         p1 = 3
         p2 = num - 3
 
-        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_plus(iteration))
         dt_diff[1] += duration
         dt_iter[1] += iterations
 
@@ -418,7 +231,7 @@ for k in range (min_num, max_num):
             p1 = p1 - 1
             p2 = p2 + 1
 
-        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_minus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_minus(iteration))
         dt_diff[2] += duration
         dt_iter[2] += iterations
 
@@ -431,7 +244,7 @@ for k in range (min_num, max_num):
         p1 = 5
         p2 = num - 5
 
-        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_constant_plus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_plus(iteration))
         dt_diff[3] += duration
         dt_iter[3] += iterations
 
@@ -444,7 +257,7 @@ for k in range (min_num, max_num):
         p1 = 5
         p2 = num - 5
 
-        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_variable(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_variable(iteration))
         dt_diff[4] += duration
         dt_iter[4] += iterations
 
@@ -457,7 +270,7 @@ for k in range (min_num, max_num):
         p1 = 3
         p2 = num - 3
 
-        (p1, p2, duration, iterations) = search_for_partition (p1, p2, lambda iteration: delta_prime(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_prime(iteration))
         dt_diff[5] += duration
         dt_iter[5] += iterations
 
