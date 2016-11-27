@@ -35,6 +35,7 @@ import primes
 
 class GoldbachPartition:
 
+    # object for carrying out operations on prime numbers
     primes = ""
 
     def __init__(self, p):
@@ -78,5 +79,19 @@ class GoldbachPartition:
                 p2 = p2 - delta (iteration)
             if p2 < 2 or p1 < 2:
                 raise ("Could not find GP")
+        duration = time.time() - startTime
+        return p1, p2, duration, iteration
+
+    def search_for_difference (self, num):
+        found = False
+        iteration = 0
+    
+        startTime = time.time()
+        while (not found):
+            iteration += 1
+            p1 = self.primes.get_ith_prime (iteration) # skip 2; start from 3
+            p2 = p1 + num
+            if self.primes.is_prime (p2):
+                found = True
         duration = time.time() - startTime
         return p1, p2, duration, iteration
