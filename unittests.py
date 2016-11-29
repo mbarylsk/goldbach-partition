@@ -122,6 +122,7 @@ class TestMethods(unittest.TestCase):
     def test_search_for_difference(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
+        p.sort_prime_set()
         (p1, p2, duration, iterations) = gp.search_for_difference (2)
         self.assertEqual (p1, 3)
         self.assertEqual (p2, 5)
@@ -134,6 +135,14 @@ class TestMethods(unittest.TestCase):
         self.assertEqual (p1, 5)
         self.assertEqual (p2, 11)
         self.assertEqual (iterations, 2)
+
+    def test_divide(self):
+        p = primes.Primes(False)
+        gp = goldbach.GoldbachPartition (p)
+        res = gp.divide_into_chunks(range(10), 5)
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0], range(0,5))
+        self.assertEqual(res[1], range(5,10))
 
 #############################################################
 # Main - run unit tests

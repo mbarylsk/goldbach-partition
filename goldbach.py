@@ -95,3 +95,11 @@ class GoldbachPartition:
                 found = True
         duration = time.time() - startTime
         return p1, p2, duration, iteration
+
+    def divide_into_chunks (self, r, size):
+        out = []
+        last = 0
+        while last < len(r):
+            out.append (r[int(last):int(last + size)])
+            last += size
+        return out
