@@ -35,6 +35,7 @@ import time
 import numpy
 import goldbach
 import primes
+import pickle
 
 #############################################################
 # Settings - configuration
@@ -94,6 +95,7 @@ file_output_iters_alg_stats = directory + "/f_checkpoint_diff_iters_stats_alg" +
 file_output_ind_iters_alg = directory + "/f_checkpoint_diff_ind_iters_alg" + algo + ".png"
 file_output_max_iters_alg = directory + "/f_checkpoint_diff_max_iters_alg" + algo + ".png"
 file_output_duration_alg = directory + "/f_checkpoint_diff_duration_alg" + algo + ".png"
+file_output_pickle = directory + "/objs.pickle"
 
 #############################################################
 # Results of calculations
@@ -113,6 +115,14 @@ list_checkpoints_iters = [[], [], [], [], [], []]
 list_checkpoints_iters_max = [[], [], [], [], [], []]
 list_checkpoints_iters_avg = [[], [], [], [], [], []]
 list_checkpoints = []
+
+max_iterations = 0
+max_iteration_details = ""
+avg_iterations = 0
+diff_iterations = 0
+previous_iterations = 0
+loops = 0
+k_current = 0
 
 #############################################################
 # Presentation
@@ -198,6 +208,19 @@ def write_results_to_figures (directory):
         plt.grid(True)
         plt.savefig(file_output_max_iters_alg)
 
+def save_current_results ():
+    global file_output_pickle
+    global k_current, max_iterations, max_iteration_details, avg_iterations, diff_iterations, previous_iterations, loops, dt_diff, dt_iter, list_checkpoints, list_checkpoints_iters, list_checkpoints_iters_max, list_checkpoints_iters_avg, list_checkpoints_duration
+    with open(file_output_pickle, 'wb') as f:
+        pickle.dump([k_current, max_iterations, max_iteration_details, avg_iterations, diff_iterations, previous_iterations, loops, dt_diff, dt_iter, list_checkpoints, list_checkpoints_iters, list_checkpoints_iters_max, list_checkpoints_iters_avg, list_checkpoints_duration], f)
+
+def restore_previous_results ():
+    global file_output_pickle
+    global k_current, max_iterations, max_iteration_details, avg_iterations, diff_iterations, previous_iterations, loops, dt_diff, dt_iter, list_checkpoints, list_checkpoints_iters, list_checkpoints_iters_max, list_checkpoints_iters_avg, list_checkpoints_duration
+    if os.path.exists(file_output_pickle):
+        with open(file_output_pickle, 'rb') as f:
+            k_current, max_iterations, max_iteration_details, avg_iterations, diff_iterations, previous_iterations, loops, dt_diff, dt_iter, list_checkpoints, list_checkpoints_iters, list_checkpoints_iters_max, list_checkpoints_iters_avg, list_checkpoints_duration = pickle.load(f)
+
 #############################################################
 # Main
 #############################################################
@@ -213,13 +236,12 @@ print ("DONE")
 print ("Sorting primes...")
 p.sort_prime_set()
 print ("DONE")
-
-max_iterations = 0
-max_iteration_details = ""
-avg_iterations = 0
-diff_iterations = 0
-previous_iterations = 0
-loops = 0
+print ("Restore previous results...")
+restore_previous_results ()
+if k_current > 0:
+    min_num = k_current
+    print ("Restoring calcuations at", min_num)
+print ("DONE")
 
 dt_start = datetime.now()
 dt_current_previous = dt_start
@@ -271,6 +293,8 @@ for k in range (min_num, max_num):
         
         # remember results so far
         write_results_to_figures (directory)
+        k_current = k
+        save_current_results()
 
 dt_end = datetime.now()
 
