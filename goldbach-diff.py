@@ -50,8 +50,12 @@ step_factor = 2
 max_num = 200000000
 
 # Checkpoint value when partial results are drawn/displayed
+# should be greater than zero
 checkpoint_value = 200000
 
+# Type of output figures
+#   o True  - both basic and advanced figures
+#   o False - basic figures only
 create_detailed_figures = False
 
 # Caching previous primality results
@@ -236,11 +240,11 @@ print ("DONE")
 print ("Sorting primes...")
 p.sort_prime_set()
 print ("DONE")
-print ("Restore previous results...")
+print ("Restoring previous results...")
 restore_previous_results ()
 if k_current > 0:
     min_num = k_current
-    print ("Restoring calcuations at", min_num)
+    print ("Resuming calculations at", min_num)
 print ("DONE")
 
 dt_start = datetime.now()
