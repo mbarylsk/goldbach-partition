@@ -140,8 +140,8 @@ def write_results_to_figures (directory):
         list_of_handles.append(m_patch)
 
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
-    plt.xlabel('Number')
-    plt.ylabel('Time [s]')
+    plt.xlabel('n')
+    plt.ylabel('time [s]')
     plt.title('Duration of total calculations')
     plt.grid(True)
     plt.savefig(file_output_duration_alg)
@@ -161,8 +161,8 @@ def write_results_to_figures (directory):
         plt.plot(list_checkpoints, list_checkpoints_iters[5], 'm.', ms=2)
 
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
-    plt.xlabel('Number')
-    plt.ylabel('Iterations')
+    plt.xlabel('n')
+    plt.ylabel('sum(I(n))')
     plt.title('Total iterations')
     plt.grid(True)
     plt.savefig(file_output_iters_alg)
