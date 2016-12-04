@@ -35,6 +35,7 @@ import time
 import numpy
 import goldbach
 import primes
+import pickle
 
 #############################################################
 # Settings - configuration
@@ -46,10 +47,10 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 20000
+max_num = 2000000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 1000
+checkpoint_value = 10000
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -89,12 +90,11 @@ if 'a6' in algo_to_check:
     algo += "a6"
 file_output_iters_alg = directory + "/f_checkpoint_iters_alg" + algo + ".png"
 file_output_duration_alg = directory + "/f_checkpoint_duration_alg" + algo + ".png"
+file_output_pickle = directory + "/objs.pickle"
 
 #############################################################
 # Results of calculations
 #############################################################
-
-list_nums = []
 
 dt_diff = [0, 0, 0, 0, 0, 0]
 dt_iter = [0, 0, 0, 0, 0, 0]
@@ -102,6 +102,8 @@ dt_iter = [0, 0, 0, 0, 0, 0]
 list_checkpoints_duration = [[], [], [], [], [], []]
 list_checkpoints_iters = [[], [], [], [], [], []]
 list_checkpoints = []
+
+k_current = 0
 
 #############################################################
 # Presentation
@@ -165,6 +167,17 @@ def write_results_to_figures (directory):
     plt.grid(True)
     plt.savefig(file_output_iters_alg)
 
+def save_current_results (file_output_pickle):
+    global k_current, dt_diff, dt_iter, list_checkpoints_duration, list_checkpoints_iters, list_checkpoints
+    with open(file_output_pickle, 'wb') as f:
+        pickle.dump([k_current, dt_diff, dt_iter, list_checkpoints_duration, list_checkpoints_iters, list_checkpoints], f)
+
+def restore_previous_results (file_output_pickle):
+    global k_current, dt_diff, dt_iter, list_checkpoints_duration, list_checkpoints_iters, list_checkpoints
+    if os.path.exists(file_output_pickle):
+        with open(file_output_pickle, 'rb') as f:
+            k_current, dt_diff, dt_iter, list_checkpoints_duration, list_checkpoints_iters, list_checkpoints = pickle.load(f)
+
 #############################################################
 # Main
 #############################################################
@@ -180,6 +193,12 @@ print ("DONE")
 print ("Sorting primes...")
 p.sort_prime_set()
 print ("DONE")
+print ("Restoring previous results...")
+restore_previous_results (file_output_pickle)
+if k_current > 0:
+    min_num = k_current
+    print ("Resuming calculations at", min_num)
+print ("DONE")
 
 dt_start = datetime.now()
 dt_current_previous = dt_start
@@ -187,9 +206,7 @@ dt_current_previous = dt_start
 # new calculations
 for k in range (min_num, max_num):
     num = step_factor*k
-
-    list_nums.append (num)
-
+    
     # algorithm 1
     # start from half of n - the smallest possible difference between primes
     if 'a1' in algo_to_check:
@@ -304,6 +321,8 @@ for k in range (min_num, max_num):
         
         # remember results so far
         write_results_to_figures (directory)
+        k_current = k
+        save_current_results(file_output_pickle)
 
 dt_end = datetime.now()
 
@@ -313,3 +332,5 @@ print ("Total calculations lasted:", dt_diff)
 
 # final results - figures
 write_results_to_figures (directory)
+k_current = max_num
+save_current_results(file_output_pickle)

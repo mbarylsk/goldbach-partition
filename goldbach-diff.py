@@ -84,16 +84,6 @@ if not os.path.exists(directory):
 algo = ""
 if 'a1' in algo_to_check:
     algo += "a1"
-if 'a2' in algo_to_check:
-    algo += "a2"
-if 'a3' in algo_to_check:
-    algo += "a3"
-if 'a4' in algo_to_check:
-    algo += "a4"
-if 'a5' in algo_to_check:
-    algo += "a5"
-if 'a6' in algo_to_check:
-    algo += "a6"
 file_output_iters_alg = directory + "/f_checkpoint_diff_iters_alg" + algo + ".png"
 file_output_iters_alg_stats = directory + "/f_checkpoint_diff_iters_stats_alg" + algo + ".png"
 file_output_ind_iters_alg = directory + "/f_checkpoint_diff_ind_iters_alg" + algo + ".png"
@@ -143,7 +133,7 @@ def write_results_to_figures (directory):
         list_of_handles.append(g_patch)
 
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
-    plt.xlabel('Number')
+    plt.xlabel('n')
     plt.ylabel('Time [s]')
     plt.title('Duration of total calculations')
     plt.grid(True)
@@ -155,7 +145,7 @@ def write_results_to_figures (directory):
 
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('n')
-    plt.ylabel('I(n)')
+    plt.ylabel('Sum(I(n))')
     plt.title('Total iterations')
     plt.grid(True)
     plt.savefig(file_output_iters_alg)
@@ -173,7 +163,7 @@ def write_results_to_figures (directory):
 
     plt.legend(handles=list_of_handles_iter, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('n')
-    plt.ylabel('Iterations')
+    plt.ylabel('f(I(n))')
     plt.title('Max and average iterations')
     plt.grid(True)
     plt.savefig(file_output_iters_alg_stats)
@@ -184,8 +174,8 @@ def write_results_to_figures (directory):
             plt.plot(list_nums, list_iterations, 'b.', ms=2)
 
         plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
-        plt.xlabel('Number')
-        plt.ylabel('Iterations')
+        plt.xlabel('n')
+        plt.ylabel('I(n)')
         plt.title('Iterations per number')
         plt.grid(True)
         plt.savefig(file_output_ind_iters_alg)
@@ -206,20 +196,18 @@ def write_results_to_figures (directory):
         list_of_handles_iter.append(gi_patch)
 
         plt.legend(handles=list_of_handles_iter, loc='upper right', bbox_to_anchor=(0.4, 0.8))
-        plt.xlabel('Number')
-        plt.ylabel('Iterations')
+        plt.xlabel('n')
+        plt.ylabel('f(I(n))')
         plt.title('Iteration statistics')
         plt.grid(True)
         plt.savefig(file_output_max_iters_alg)
 
-def save_current_results ():
-    global file_output_pickle
+def save_current_results (file_output_pickle):
     global k_current, max_iterations, max_iteration_details, avg_iterations, diff_iterations, previous_iterations, loops, dt_diff, dt_iter, list_checkpoints, list_checkpoints_iters, list_checkpoints_iters_max, list_checkpoints_iters_avg, list_checkpoints_duration
     with open(file_output_pickle, 'wb') as f:
         pickle.dump([k_current, max_iterations, max_iteration_details, avg_iterations, diff_iterations, previous_iterations, loops, dt_diff, dt_iter, list_checkpoints, list_checkpoints_iters, list_checkpoints_iters_max, list_checkpoints_iters_avg, list_checkpoints_duration], f)
 
-def restore_previous_results ():
-    global file_output_pickle
+def restore_previous_results (file_output_pickle):
     global k_current, max_iterations, max_iteration_details, avg_iterations, diff_iterations, previous_iterations, loops, dt_diff, dt_iter, list_checkpoints, list_checkpoints_iters, list_checkpoints_iters_max, list_checkpoints_iters_avg, list_checkpoints_duration
     if os.path.exists(file_output_pickle):
         with open(file_output_pickle, 'rb') as f:
@@ -241,7 +229,7 @@ print ("Sorting primes...")
 p.sort_prime_set()
 print ("DONE")
 print ("Restoring previous results...")
-restore_previous_results ()
+restore_previous_results (file_output_pickle)
 if k_current > 0:
     min_num = k_current
     print ("Resuming calculations at", min_num)
@@ -255,7 +243,8 @@ for k in range (min_num, max_num):
     num = step_factor*k
     loops += 1
 
-    list_nums.append (num)
+    if create_detailed_figures:
+        list_nums.append (num)
 
     # algorithm 1
     if 'a1' in algo_to_check:
@@ -295,10 +284,10 @@ for k in range (min_num, max_num):
         perc_completed = str(int(k * 100 / max_num))
         print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)", max_iteration_details)
         
-        # remember results so far
+        # save results collected so far
         write_results_to_figures (directory)
         k_current = k
-        save_current_results()
+        save_current_results(file_output_pickle)
 
 dt_end = datetime.now()
 
@@ -306,5 +295,7 @@ dt_end = datetime.now()
 dt_diff = dt_end - dt_start
 print ("Total calculations lasted:", dt_diff)
 
-# final results - figures
+# final results
 write_results_to_figures (directory)
+k_current = max_num
+save_current_results(file_output_pickle)
