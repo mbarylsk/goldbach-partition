@@ -119,6 +119,15 @@ class TestMethods(unittest.TestCase):
         self.assertEqual (p2, 7)
         self.assertEqual (iterations, 2)
 
+    def test_sumofprimenumbers(self):
+        p = primes.Primes(False)
+        gp = goldbach.GoldbachPartition (p)
+        self.assertEqual(gp.find_sum_of_prime_numbers(4), [(2,2)])
+        self.assertEqual(gp.find_sum_of_prime_numbers(6), [(3,3)])
+        self.assertEqual(gp.find_sum_of_prime_numbers(8), [(3,5)])
+        self.assertEqual(gp.find_sum_of_prime_numbers(10), [(3,7),(5,5)])
+        self.assertEqual(gp.find_sum_of_prime_numbers(22), [(3,19),(5,17),(11,11)])
+
     def test_search_for_difference(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)

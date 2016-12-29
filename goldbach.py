@@ -82,6 +82,18 @@ class GoldbachPartition:
         duration = time.time() - startTime
         return p1, p2, duration, iteration
 
+    def find_sum_of_prime_numbers (self, n):
+        min_i = 2
+        max_i = int(n / 2) + 1
+        factors = []
+        for i in range (min_i, max_i):
+            p1 = i
+            p2 = n - p1
+            if self.primes.is_prime(p1) and self.primes.is_prime (p2):
+                pair = (p1, p2)
+                factors.append (pair)
+        return factors
+
     def search_for_difference (self, num):
         found = False
         iteration = 0
@@ -95,6 +107,17 @@ class GoldbachPartition:
                 found = True
         duration = time.time() - startTime
         return p1, p2, duration, iteration
+
+    def reduce_prime_for_goldbach (self, p):
+        n = 1
+        q = p
+        while (q > 2):
+            q = p - 2**n
+            if self.primes.is_prime(q):
+                break
+            else:
+                n += 1
+        return (n, q)
 
     def divide_into_chunks (self, r, size):
         out = []
