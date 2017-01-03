@@ -39,7 +39,7 @@ min_num = 1
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 200000
+max_num = 2000000
 
 # Checkpoint value when partial results are drawn/displayed
 # should be greater than zero
@@ -98,25 +98,25 @@ def write_results_to_figures():
     area = np.pi * 2
     fig = plt.figure(1)
     plt.scatter(datax[0], datay[0], s=area, c=colors[0], alpha=0.5)
-    title = "2k+1, from 3 to " + str(num_current[0])
+    title = "n=2k+1 (k=1,2,3...); n from 3 to " + str(num_current[0])
     fig.suptitle(title, fontsize=10)
     plt.savefig(file_output_shape_1)
 
     fig = plt.figure(2)
     plt.scatter(datax[1], datay[1], s=area, c=colors[1], alpha=0.5)
-    title = "6k+1, from 5 to " + str(num_current[1])
+    title = "n=6k+1 (k=1,2,3...); n from 7 to " + str(num_current[1])
     fig.suptitle(title, fontsize=10)
     plt.savefig(file_output_shape_2)
 
     fig = plt.figure(3)
     plt.scatter(datax[2], datay[2], s=area, c=colors[2], alpha=0.5)
-    title = "6k-1, from 5 to " + str(num_current[2])
+    title = "n=6k-1 (k=1,2,3...); n from 5 to " + str(num_current[2])
     fig.suptitle(title, fontsize=10)
     plt.savefig(file_output_shape_3)
 
     fig = plt.figure(4)
     plt.scatter(datax[3], datay[3], s=area, c=colors[3], alpha=0.5)
-    title = "6k-+1, from 5 to " + str(num_current[3])
+    title = "n = 6k-+1 (k=1,2,3...); n from 5 to " + str(num_current[3])
     fig.suptitle(title, fontsize=10)
     plt.savefig(file_output_shape_4)
 
@@ -140,6 +140,22 @@ def next_delta (delta_x, delta_y, turn):
             return (delta_x, delta_y)
     return (delta_x, delta_y)
 
+def next_turn (p, num, is_previous_prime):
+    turn = False
+    if p.is_prime(num) and not is_previous_prime:
+        turn = True
+        is_previous_prime = True
+    if not p.is_prime(num) and is_previous_prime:
+        turn = True
+        is_previous_prime = False
+    return (turn, is_previous_prime)
+
+def next_sign (sign):
+    if sign == 1:
+        return -1
+    else:
+        return 1
+
 #############################################################
 # Main
 #############################################################
@@ -162,14 +178,7 @@ for k in range (min_num, max_num):
     num = k*step_factor + 1
     num_current[0] = num
 
-    turn = False
-    if p.is_prime(num) and not is_previous_prime[0]:
-        turn = True
-        is_previous_prime[0] = True
-    if not p.is_prime(num) and is_previous_prime[0]:
-        turn = True
-        is_previous_prime[0] = False
-
+    (turn, is_previous_prime[0]) = next_turn (p, num, is_previous_prime[0])
     (delta_x[0], delta_y[0]) = next_delta (delta_x[0], delta_y[0], turn)
 
     new_x[0]+= delta_x[0]
@@ -185,14 +194,7 @@ for k in range (min_num, max_num):
     num = k*3*step_factor + 1
     num_current[1] = num
 
-    turn = False
-    if p.is_prime(num) and not is_previous_prime[1]:
-        turn = True
-        is_previous_prime[1] = True
-    if not p.is_prime(num) and is_previous_prime[1]:
-        turn = True
-        is_previous_prime[1] = False
-
+    (turn, is_previous_prime[1]) = next_turn (p, num, is_previous_prime[1])
     (delta_x[1], delta_y[1]) = next_delta (delta_x[1], delta_y[1], turn)
 
     new_x[1]+= delta_x[1]
@@ -208,14 +210,7 @@ for k in range (min_num, max_num):
     num = k*3*step_factor - 1
     num_current[2] = num
 
-    turn = False
-    if p.is_prime(num) and not is_previous_prime[2]:
-        turn = True
-        is_previous_prime[2] = True
-    if not p.is_prime(num) and is_previous_prime[2]:
-        turn = True
-        is_previous_prime[2] = False
-
+    (turn, is_previous_prime[2]) = next_turn (p, num, is_previous_prime[2])
     (delta_x[2], delta_y[2]) = next_delta (delta_x[2], delta_y[2], turn)
 
     new_x[2]+= delta_x[2]
@@ -231,19 +226,8 @@ for k in range (min_num, max_num):
     num = k*3*step_factor - 1*sign
     num_current[3] = num
 
-    turn = False
-    if p.is_prime(num) and not is_previous_prime[3]:
-        turn = True
-        is_previous_prime[3] = True
-    if not p.is_prime(num) and is_previous_prime[3]:
-        turn = True
-        is_previous_prime[3] = False
-
-    if sign == 1:
-        sign = -1
-    else:
-        sign = 1
-
+    (turn, is_previous_prime[3]) = next_turn (p, num, is_previous_prime[3])
+    sign = next_sign (sign)
     (delta_x[3], delta_y[3]) = next_delta (delta_x[3], delta_y[3], turn)
 
     new_x[3]+= delta_x[3]
