@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import primes
 import os
 import numpy as np
+import pickle
 
 #############################################################
 # Settings - configuration
@@ -72,6 +73,7 @@ file_output_shape_1 = directory + "/f_shape_1.png"
 file_output_shape_2 = directory + "/f_shape_2.png"
 file_output_shape_3 = directory + "/f_shape_3.png"
 file_output_shape_4 = directory + "/f_shape_4.png"
+file_output_pickle = directory + "/objs_shape.pickle"
 
 #############################################################
 # Results of calculations
@@ -89,6 +91,7 @@ colors = [[0], [0], [0], [0]]
 
 is_previous_prime = [False, False, False, False]
 sign = 1
+k_current = 0
 
 #############################################################
 # Presentation
@@ -156,6 +159,17 @@ def next_sign (sign):
     else:
         return 1
 
+def save_current_results (file_output_pickle):
+    global k_current, new_x, new_y, delta_x, delta_y, num_current, datax, datay, colors, is_previous_prime, sign
+    with open(file_output_pickle, 'wb') as f:
+        pickle.dump([k_current, new_x, new_y, delta_x, delta_y, num_current, datax, datay, colors, is_previous_prime, sign], f)
+
+def restore_previous_results (file_output_pickle):
+    global k_current, new_x, new_y, delta_x, delta_y, num_current, datax, datay, colors, is_previous_prime, sign
+    if os.path.exists(file_output_pickle):
+        with open(file_output_pickle, 'rb') as f:
+           k_current, new_x, new_y, delta_x, delta_y, num_current, datax, datay, colors, is_previous_prime, sign = pickle.load(f)
+
 #############################################################
 # Main
 #############################################################
@@ -169,6 +183,12 @@ p.init_set(file_input_nonprimes, False)
 print ("DONE")
 print ("Sorting primes...")
 p.sort_prime_set()
+print ("DONE")
+print ("Restoring previous results...")
+restore_previous_results (file_output_pickle)
+if k_current > 0:
+    min_num = k_current
+    print ("Resuming calculations at", min_num)
 print ("DONE")
 
 # new calculations
@@ -246,8 +266,12 @@ for k in range (min_num, max_num):
         
         # save results collected so far
         write_results_to_figures ()
+        k_current = k
+        save_current_results(file_output_pickle)
 
 
 # final results
 write_results_to_figures ()
+k_current = max_num
+save_current_results(file_output_pickle)
 
