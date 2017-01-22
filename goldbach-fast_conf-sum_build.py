@@ -32,7 +32,7 @@ import primes
 # Settings - configuration
 #############################################################
 
-min_prime_index = 2
+min_prime_index = 1
 max_prime_index = 1000
 
 # Caching previous primality results
@@ -55,7 +55,6 @@ file_input_nonprimes = 't_nonprime_numbers.txt'
 # skipping 2 - because it is a part of 1 GP only: 4 = 2 + 2
 # starting from 3
 local_primes = []
-local_primes.append(3)
 lp_sum = 0
 
 verified_intervals = set()
@@ -74,9 +73,15 @@ def get_data_from_verified_intervals ():
     item_previous = 4
     list_verified_intervals = sorted (verified_intervals)
     for item in list_verified_intervals:
-        if item_previous + 2 < item:
-            missing.add(item_previous + 2)
-        item_previous += item
+        finished = False
+        k = 2
+        while not finished:
+            if item_previous + k < item:
+                missing.add(item_previous + k)
+                k += 2
+            else:
+                finished = True
+        item_previous = item
     return (missing, min(list_verified_intervals), max(list_verified_intervals))
 
 def print_stats ():
@@ -111,13 +116,13 @@ dt_current_previous = dt_start
 # new calculations
 for k in range (min_prime_index, max_prime_index):
 
-    # construct sums for GP
-    for lp in local_primes:
-        lp_sum = lp + local_primes[k - min_prime_index]
-        add_to_verified_intervals (lp_sum)
-    
-    # add new prime for further tests
+    # add new prime to GP build base
     local_primes.append(p.get_ith_prime(k))
+
+    # build all possible GPs
+    for lp in local_primes:
+        lp_sum = lp + max(local_primes)
+        add_to_verified_intervals (lp_sum)
 
 dt_end = datetime.now()
 
