@@ -33,7 +33,8 @@ import primes
 #############################################################
 
 min_prime_index = 1
-max_prime_index = 1000
+max_prime_index = 100000
+checkpoint_value = 500
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -52,12 +53,14 @@ file_input_nonprimes = 't_nonprime_numbers.txt'
 # Results of calculations
 #############################################################
 
-# skipping 2 - because it is a part of 1 GP only: 4 = 2 + 2
-# starting from 3
 local_primes = []
 lp_sum = 0
 
 verified_intervals = set()
+
+to_be_verified = set()
+already_verified = set()
+num_where_all_verified = 4
 
 #############################################################
 # Presentation
@@ -67,6 +70,32 @@ def add_to_verified_intervals (num):
     global verified_intervals
     verified_intervals.add(num)
 
+def add_nums_to_be_verified (num):
+    global to_be_verified, num_where_all_verified
+    if num > num_where_all_verified:
+        for k in range (num_where_all_verified + 2, num, 2):
+            if k not in already_verified:
+                to_be_verified.add(k)
+
+def remove_nums_to_be_verified (num, max_num):
+    global to_be_verified, num_where_all_verified, already_verified
+
+    already_verified.add(num)
+    
+    if num in to_be_verified:
+        to_be_verified.remove(num)
+    if (len(to_be_verified) > 0):
+        min_num = min(to_be_verified)
+        if min_num > num_where_all_verified + 2:
+            num_where_all_verified = min_num
+    else:
+        num_where_all_verified = max_num
+
+    copy_already_verified = already_verified.copy()
+    for n in copy_already_verified:
+        if n < num_where_all_verified:
+            already_verified.remove(n)
+        
 def get_data_from_verified_intervals ():
     global verified_intervals
     missing = set()
@@ -86,6 +115,7 @@ def get_data_from_verified_intervals ():
 
 def print_stats ():
     (miss_nums, num_min, num_max) = get_data_from_verified_intervals()
+    print ("================================================================================")
     print ("Primes used to generate GP:", local_primes)
     print (" Verified min :", num_min)
     print (" Verified max :", num_max)
@@ -93,6 +123,16 @@ def print_stats ():
         print (" Missing nums : -")
     else:
         print (" Missing nums :", miss_nums)
+
+def print_stats_2 (i):
+    global to_be_verified, num_where_all_verified
+    print ("===============================================================================")
+    print ("Iteration:", i)
+    print (" Even numbers to be verified:", to_be_verified)
+    print (" # of numbers to be verified:", len(to_be_verified))
+    print (" All even numbers verified up to:", num_where_all_verified)
+    print (" Spare verified numbers:", already_verified)
+    print (" # of spare verified numbers:", len(already_verified))
 
 #############################################################
 # Main
@@ -113,20 +153,48 @@ print ("DONE")
 dt_start = datetime.now()
 dt_current_previous = dt_start
 
-# new calculations
-for k in range (min_prime_index, max_prime_index):
+### new calculations
+##for k in range (min_prime_index, max_prime_index):
+##
+##    # add new prime to GP build base
+##    local_primes.append(p.get_ith_prime(k))
+##
+##    # build all possible GPs
+##    for lp in local_primes:
+##        lp_sum = lp + max(local_primes)
+##        add_to_verified_intervals (lp_sum)
 
-    # add new prime to GP build base
-    local_primes.append(p.get_ith_prime(k))
+k = 0
+max_num = max_prime_index - min_prime_index
+for ip1 in range (min_prime_index, max_prime_index):
 
-    # build all possible GPs
-    for lp in local_primes:
-        lp_sum = lp + max(local_primes)
-        add_to_verified_intervals (lp_sum)
+    p1 = p.get_ith_prime(ip1)
+    add_nums_to_be_verified (2*p1)
+    #print ("DEBUG1:",ip1,p1)
+    
+    for ip2 in range (1, ip1+1):
+        p2 = p.get_ith_prime(ip2)
+        #print ("DEBUG2:",ip2,p2)
+        num = p1 + p2
+        #print ("DEBUG3:", p1, p2, num)
+        remove_nums_to_be_verified (num, 2*p1)
+
+    # checkpoint - partial results
+    if ip1 % checkpoint_value == 0:
+        dt_current = datetime.now()
+        dt_diff_current = (dt_current - dt_current_previous).total_seconds()
+
+        perc_completed = str(int(k * 100 / max_num))
+        print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
+        
+        print_stats_2 (ip1)
+        
+    k += 1
 
 dt_end = datetime.now()
 
 # final results - time of processing
 dt_diff = dt_end - dt_start
-print_stats ()
+print_stats_2 (ip1)
+#print_stats ()
 print ("Total calculations lasted:", dt_diff)

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Marcin Barylski
+# Copyright (c) 2016 - 2017, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -47,10 +47,10 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 2000000
+max_num = 10000000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 10000
+checkpoint_value = 100000
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -61,6 +61,7 @@ caching_primality_results = False
 
 # Algorithms to be checked
 algo_to_check = {'a1', 'a2', 'a3', 'a4', 'a5', 'a6'}
+algo_to_check = {'a2', 'a6'}
 
 # Helper files
 #   o file_input_primes - contains prime numbers
@@ -89,6 +90,7 @@ if 'a5' in algo_to_check:
 if 'a6' in algo_to_check:
     algo += "a6"
 file_output_iters_alg = directory + "/f_checkpoint_iters_alg" + algo + ".png"
+file_output_iters_prob_alg = directory + "/f_checkpoint_iters_prob_alg" + algo + ".png"
 file_output_duration_alg = directory + "/f_checkpoint_duration_alg" + algo + ".png"
 file_output_pickle = directory + "/objs.pickle"
 
@@ -98,6 +100,8 @@ file_output_pickle = directory + "/objs.pickle"
 
 dt_diff = [0, 0, 0, 0, 0, 0]
 dt_iter = [0, 0, 0, 0, 0, 0]
+list_iter_which = [[], [], [], [], [], []]
+list_iter_which_prob = [[], [], [], [], [], []]
 
 list_checkpoints_duration = [[], [], [], [], [], []]
 list_checkpoints_iters = [[], [], [], [], [], []]
@@ -109,9 +113,36 @@ k_current = 0
 # Presentation
 #############################################################
 
+def increment_list_at_index (my_list, index):
+    i = 0
+    my_local_list = my_list
+    while i <= index:
+        if len(my_local_list) <= i:
+            my_local_list.append(0)
+        if i == index:
+            value = my_local_list[i]
+            my_local_list[i] = value + 1
+        i += 1
+    return my_local_list
+
+def calculate_percents (list_values):
+    list_percents = []
+    total_sum = sum(list_values)
+    i = 0
+    while i < len (list_values):
+        list_percents.append (100*list_values[i] / total_sum)
+        i += 1
+    return list_percents
+            
+def update_algo_results (idc, duration, iterations):
+    global dt_diff, dt_iter, dt_iter_which
+    dt_diff[idc] += duration
+    dt_iter[idc] += iterations
+    list_iter_which[idc] = increment_list_at_index (list_iter_which[idc], iterations)
+
 def write_results_to_figures (directory):
     # results - figures    
-    plt.figure(1)
+    fig1 = plt.figure(1)
     g_patch = mpatches.Patch(color='green', label='A1')
     r_patch = mpatches.Patch(color='red', label='A2')
     b_patch = mpatches.Patch(color='blue', label='A3')
@@ -145,8 +176,9 @@ def write_results_to_figures (directory):
     plt.title('Duration of total calculations')
     plt.grid(True)
     plt.savefig(file_output_duration_alg)
+    plt.close(fig1)
 
-    plt.figure(2)
+    fig2 = plt.figure(2)
     if 'a1' in algo_to_check:
         plt.plot(list_checkpoints, list_checkpoints_iters[0], 'g.', ms=2)
     if 'a2' in algo_to_check:
@@ -166,6 +198,36 @@ def write_results_to_figures (directory):
     plt.title('Total iterations')
     plt.grid(True)
     plt.savefig(file_output_iters_alg)
+    plt.close(fig2)
+    
+    fig3 = plt.figure(3)
+    
+    if 'a1' in algo_to_check:
+        list_iter_which_prob[0] = calculate_percents (list_iter_which[0])
+        plt.plot(list_iter_which_prob[0], 'g-', ms=2)
+    if 'a2' in algo_to_check:
+        list_iter_which_prob[1] = calculate_percents (list_iter_which[1])
+        plt.plot(list_iter_which_prob[1], 'r-', ms=2)
+    if 'a3' in algo_to_check:
+        list_iter_which_prob[2] = calculate_percents (list_iter_which[2])
+        plt.plot(list_iter_which_prob[2], 'b-', ms=2)
+    if 'a4' in algo_to_check:
+        list_iter_which_prob[3] = calculate_percents (list_iter_which[3])
+        plt.plot(list_iter_which_prob[3], 'y-', ms=2)
+    if 'a5' in algo_to_check:
+        list_iter_which_prob[4] = calculate_percents (list_iter_which[4])
+        plt.plot(list_iter_which_prob[4], 'c-', ms=2)
+    if 'a6' in algo_to_check:
+        list_iter_which_prob[5] = calculate_percents (list_iter_which[5])
+        plt.plot(list_iter_which_prob[5], 'm-', ms=2)
+
+    plt.yscale('log')
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.xlabel('Number of iterations')
+    plt.ylabel('Probability [%] (log scale)')
+    plt.title('Probability of iterations required to find GP')
+    plt.savefig(file_output_iters_prob_alg)
+    plt.close(fig3)
 
 def save_current_results (file_output_pickle):
     global k_current, dt_diff, dt_iter, list_checkpoints_duration, list_checkpoints_iters, list_checkpoints
@@ -218,8 +280,7 @@ for k in range (min_num, max_num):
             p2 = p1
 
         (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_minus(iteration))
-        dt_diff[0] += duration
-        dt_iter[0] += iterations
+        update_algo_results (0, duration, iterations)
 
         if p1 + p2 != num:
             print ("Alg #1: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -231,8 +292,7 @@ for k in range (min_num, max_num):
         p2 = num - 3
 
         (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_plus(iteration))
-        dt_diff[1] += duration
-        dt_iter[1] += iterations
+        update_algo_results (1, duration, iterations)
 
         if p1 + p2 != num:
             print ("Alg #2: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -247,8 +307,7 @@ for k in range (min_num, max_num):
             p2 = p2 + 1
 
         (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_minus(iteration))
-        dt_diff[2] += duration
-        dt_iter[2] += iterations
+        update_algo_results (2, duration, iterations)
 
         if p1 + p2 != num:
             print ("Alg #3: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -260,8 +319,7 @@ for k in range (min_num, max_num):
         p2 = num - 5
 
         (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_plus(iteration))
-        dt_diff[3] += duration
-        dt_iter[3] += iterations
+        update_algo_results (3, duration, iterations)
 
         if p1 + p2 != num:
             print ("Alg #4: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -273,8 +331,7 @@ for k in range (min_num, max_num):
         p2 = num - 5
 
         (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_variable(iteration))
-        dt_diff[4] += duration
-        dt_iter[4] += iterations
+        update_algo_results (4, duration, iterations)
 
         if p1 + p2 != num:
             print ("Alg #5: violation of sum for p1=", p1, "p2=", p2, "n=", num)
@@ -286,8 +343,7 @@ for k in range (min_num, max_num):
         p2 = num - 3
 
         (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_prime(iteration))
-        dt_diff[5] += duration
-        dt_iter[5] += iterations
+        update_algo_results (5, duration, iterations)
 
         if p1 + p2 != num:
             print ("Alg #6: violation of sum for p1=", p1, "p2=", p2, "n=", num)
