@@ -43,6 +43,11 @@ checkpoint_value = 500
 #   o False - do not cache new primality test results
 caching_primality_results = False
 
+# Methods:
+#   o method 1 - check all possible sums of primes, build all possible GPs
+#   o method 2 - check all possible sums of primes, optimized, show min number where all GPs verified
+method = 2
+
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
@@ -63,7 +68,7 @@ already_verified = set()
 num_where_all_verified = 4
 
 #############################################################
-# Presentation
+# Business logic
 #############################################################
 
 def add_to_verified_intervals (num):
@@ -113,12 +118,17 @@ def get_data_from_verified_intervals ():
         item_previous = item
     return (missing, min(list_verified_intervals), max(list_verified_intervals))
 
-def print_stats ():
+#############################################################
+# Presentation
+#############################################################
+
+def print_stats_1 (i):
     (miss_nums, num_min, num_max) = get_data_from_verified_intervals()
     print ("================================================================================")
-    print ("Primes used to generate GP:", local_primes)
-    print (" Verified min :", num_min)
-    print (" Verified max :", num_max)
+    print ("Iteration:", i)
+    print (" Primes used to generate GP:", local_primes)
+    print ("  Verified min :", num_min)
+    print ("  Verified max :", num_max)
     if len(miss_nums) == 0:
         print (" Missing nums : -")
     else:
@@ -153,48 +163,65 @@ print ("DONE")
 dt_start = datetime.now()
 dt_current_previous = dt_start
 
-### new calculations
-##for k in range (min_prime_index, max_prime_index):
-##
-##    # add new prime to GP build base
-##    local_primes.append(p.get_ith_prime(k))
-##
-##    # build all possible GPs
-##    for lp in local_primes:
-##        lp_sum = lp + max(local_primes)
-##        add_to_verified_intervals (lp_sum)
-
 k = 0
 max_num = max_prime_index - min_prime_index
-for ip1 in range (min_prime_index, max_prime_index):
 
-    p1 = p.get_ith_prime(ip1)
-    add_nums_to_be_verified (2*p1)
-    #print ("DEBUG1:",ip1,p1)
+# new calculations
+if method == 1: 
+    for ip in range (min_prime_index, max_prime_index):
+
+        # add new prime to GP build base
+        local_primes.append(p.get_ith_prime(ip))
+        
+        # build all possible GPs
+        for lp in local_primes:
+            lp_sum = lp + max(local_primes)
+            add_to_verified_intervals (lp_sum)
+
+        # checkpoint - partial results
+        if k % checkpoint_value == 0:
+            dt_current = datetime.now()
+            dt_diff_current = (dt_current - dt_current_previous).total_seconds()
+
+            perc_completed = str(int(k * 100 / max_num))
+            print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
+        
+            print_stats_1 (k)
+
+
+        k += 1
     
-    for ip2 in range (1, ip1+1):
-        p2 = p.get_ith_prime(ip2)
-        #print ("DEBUG2:",ip2,p2)
-        num = p1 + p2
-        #print ("DEBUG3:", p1, p2, num)
-        remove_nums_to_be_verified (num, 2*p1)
+elif method == 2:
+    
+    for ip1 in range (min_prime_index, max_prime_index):
 
-    # checkpoint - partial results
-    if ip1 % checkpoint_value == 0:
-        dt_current = datetime.now()
-        dt_diff_current = (dt_current - dt_current_previous).total_seconds()
+        p1 = p.get_ith_prime(ip1)
+        add_nums_to_be_verified (2*p1)
+    
+        for ip2 in range (1, ip1+1):
+            p2 = p.get_ith_prime(ip2)
+            num = p1 + p2
+            remove_nums_to_be_verified (num, 2*p1)
 
-        perc_completed = str(int(k * 100 / max_num))
-        print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
+        # checkpoint - partial results
+        if k % checkpoint_value == 0:
+            dt_current = datetime.now()
+            dt_diff_current = (dt_current - dt_current_previous).total_seconds()
+
+            perc_completed = str(int(k * 100 / max_num))
+            print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
         
-        print_stats_2 (ip1)
+            print_stats_2 (k)
         
-    k += 1
+        k += 1
 
 dt_end = datetime.now()
 
 # final results - time of processing
 dt_diff = dt_end - dt_start
-print_stats_2 (ip1)
-#print_stats ()
+if method == 1:
+    print_stats_1 (k)
+elif method == 2:
+    print_stats_2 (k)
+
 print ("Total calculations lasted:", dt_diff)
