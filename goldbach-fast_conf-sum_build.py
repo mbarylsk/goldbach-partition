@@ -25,6 +25,8 @@
 # 
 
 from datetime import datetime
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import goldbach
 import primes
 
@@ -66,6 +68,14 @@ verified_intervals = set()
 to_be_verified = set()
 already_verified = set()
 num_where_all_verified = 4
+
+list_num_where_all_verified = []
+list_to_be_verified = []
+list_already_verified = []
+list_num_max = []
+list_max_actual_diff = []
+list_max_actual_diff_perc = []
+list_checkpoints = []
 
 #############################################################
 # Business logic
@@ -144,6 +154,57 @@ def print_stats_2 (i):
     print (" Spare verified numbers:", already_verified)
     print (" # of spare verified numbers:", len(already_verified))
 
+    fig1 = plt.figure(1)
+    r_patch = mpatches.Patch(color='red', label='all verified')
+    g_patch = mpatches.Patch(color='green', label='theoretical max')
+    list_of_handles = []
+    list_of_handles.append(r_patch)
+    list_of_handles.append(g_patch)
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.plot(list_checkpoints, list_num_where_all_verified, 'r-', ms=2)
+    plt.plot(list_checkpoints, list_num_max, 'g-', ms=2)
+    plt.xlabel('iteration')
+    plt.ylabel('number')
+    plt.title('Min number where all numbers below are verified from GP standpoint')
+    plt.grid(True)
+    file_output_fig1 = "results/fig1_effectiveness.png"
+    plt.savefig(file_output_fig1)
+    plt.close(fig1)
+
+    fig2 = plt.figure(1)
+    r_patch = mpatches.Patch(color='red', label='to be verified')
+    g_patch = mpatches.Patch(color='green', label='already verified')
+    list_of_handles = []
+    list_of_handles.append(r_patch)
+    list_of_handles.append(g_patch)
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.plot(list_checkpoints, list_to_be_verified, 'r-', ms=1)
+    plt.plot(list_checkpoints, list_already_verified, 'g-', ms=1)
+    plt.xlabel('iteration')
+    plt.ylabel('number of elements')
+    plt.title('Spare verified numbers and numbers to be verified')
+    plt.grid(True)
+    file_output_fig2 = "results/fig2_spare_and_to_be_verified.png"
+    plt.savefig(file_output_fig2)
+    plt.close(fig2)
+
+    fig3 = plt.figure(1)
+    r_patch = mpatches.Patch(color='red', label='diff')
+    g_patch = mpatches.Patch(color='green', label='delta in iters')
+    list_of_handles = []
+    list_of_handles.append(r_patch)
+    list_of_handles.append(g_patch)
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.plot(list_checkpoints, list_max_actual_diff, 'r-', ms=1)
+    plt.plot(list_checkpoints, list_max_actual_diff_perc, 'g-', ms=1)
+    plt.xlabel('iteration')
+    plt.ylabel('difference')
+    plt.title('Difference between actual and theoretical minimum')
+    plt.grid(True)
+    file_output_fig3 = "results/fig3_diff.png"
+    plt.savefig(file_output_fig3)
+    plt.close(fig3)
+
 #############################################################
 # Main
 #############################################################
@@ -165,6 +226,7 @@ dt_current_previous = dt_start
 
 k = 0
 max_num = max_prime_index - min_prime_index
+diff_previous = 0
 
 # new calculations
 if method == 1: 
@@ -212,8 +274,20 @@ elif method == 2:
             print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
         
             print_stats_2 (k)
+
+        list_checkpoints.append (k)
+        list_num_where_all_verified.append (num_where_all_verified)
+        list_num_max.append (num)
+        diff_now = num - num_where_all_verified
+        list_max_actual_diff.append (diff_now)
+        list_max_actual_diff_perc.append (abs(diff_now - diff_previous))
+        if num == num_where_all_verified:
+            print ("Verified all till max for iteration", k)
+        list_to_be_verified.append(len(to_be_verified))
+        list_already_verified.append(len(already_verified))
         
         k += 1
+        diff_previous = diff_now
 
 dt_end = datetime.now()
 
