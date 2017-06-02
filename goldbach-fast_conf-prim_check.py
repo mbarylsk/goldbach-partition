@@ -73,7 +73,7 @@ file_input_nonprimes = 't_nonprime_numbers.txt'
 # Settings - output directory and files
 #############################################################
 
-directory = str(step_factor*max_num)
+directory = "results/" + str(step_factor*max_num)
 if not os.path.exists(directory):
     os.makedirs(directory)
 algo = ""
