@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Marcin Barylski
+# Copyright (c) 2016 - 2017, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -78,7 +78,7 @@ class GoldbachPartition:
                 p1 = p1 + delta (iteration)
                 p2 = p2 - delta (iteration)
             if p2 < 2 or p1 < 2:
-                raise ("Could not find GP")
+                raise ("CouldNotFindGP")
         duration = time.time() - startTime
         return p1, p2, duration, iteration
 

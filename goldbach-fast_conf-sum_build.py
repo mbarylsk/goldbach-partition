@@ -75,6 +75,7 @@ list_already_verified = []
 list_num_max = []
 list_max_actual_diff = []
 list_max_actual_diff_perc = []
+list_iters = []
 list_checkpoints = []
 
 #############################################################
@@ -163,7 +164,7 @@ def print_stats_2 (i):
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.plot(list_checkpoints, list_num_where_all_verified, 'r-', ms=2)
     plt.plot(list_checkpoints, list_num_max, 'g-', ms=2)
-    plt.xlabel('iteration')
+    plt.xlabel('round of algorithm')
     plt.ylabel('number')
     plt.title('Min number where all numbers below are verified from GP standpoint')
     plt.grid(True)
@@ -227,6 +228,7 @@ dt_current_previous = dt_start
 k = 0
 max_num = max_prime_index - min_prime_index
 diff_previous = 0
+iterations = 0
 
 # new calculations
 if method == 1: 
@@ -285,6 +287,7 @@ elif method == 2:
             print ("Verified all till max for iteration", k)
         list_to_be_verified.append(len(to_be_verified))
         list_already_verified.append(len(already_verified))
+        list_iters.append(iterations)
         
         k += 1
         diff_previous = diff_now
