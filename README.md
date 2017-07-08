@@ -6,7 +6,7 @@ _2n_ = _p_ + _q_
 
 where:
 
-  * _n_ >=2, 
+  * _n_ >= 2, 
   * _p_ and _q_ are prime numbers 
 
 So far (by 2017) GSC has not been proven yet, although has been computationally verified up to _4 × 10^18_.
@@ -17,11 +17,24 @@ This framework is used to find the fastest computational confirmation method of 
 ## Methods based on primality check of components of 2n
 
 _goldbach-fast_conf-prim_check.py_ is examining 6 different approach which are based on iteration over even integers, decomposition to two integers and final primality check of both components.
-Search for GP is successful if both components are primes.
+Search for GP is successful if both components are primes. _goldbach-fast_conf-prim_check-distr.py_ is a distributed version of this approach.
 
 ## Methods based on possible sum building from already known prime numbers
 
 _goldbach-fast_conf-sum_build.py_ is examining how fast it is possible to build even integers from a set of already known prime numbers.
+
+## Auxilary script - reduction
+
+_goldbach-reduction.py_ verifies if two primes from at least one GP can be lowered by 2^x (x >= 1), still remaining prime numbers. It is examining hypothesis that:
+
+_2n_ = _p_ + _q_ + _2^a_ + _2^b_
+
+where:
+
+  * _n_ >= 2
+  * _a_ >= 1
+  * _b_ >= 1
+  * p and q are primes
 
 ## Dependencies
 
