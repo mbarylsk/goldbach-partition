@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Marcin Barylski
+# Copyright (c) 2016 - 2017, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -24,8 +24,10 @@
 # OF SUCH DAMAGE.
 # 
 
+import sys
 import unittest
 import goldbach
+sys.path.insert(0, '..\\primes\\')
 import primes
 
 #############################################################

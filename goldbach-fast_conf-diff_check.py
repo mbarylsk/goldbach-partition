@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Marcin Barylski
+# Copyright (c) 2016 - 2017, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -33,9 +33,10 @@ import os
 from datetime import datetime
 import time
 import numpy
-import goldbach
-import primes
 import pickle
+import goldbach
+sys.path.insert(0, '..\\primes\\')
+import primes
 
 #############################################################
 # Settings - configuration
@@ -71,8 +72,8 @@ algo_to_check = {'a1'}
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
-file_input_primes = 't_prime_numbers.txt'
-file_input_nonprimes = 't_nonprime_numbers.txt'
+file_input_primes = '..\primes\t_prime_numbers.txt'
+file_input_nonprimes = '..\primes\t_nonprime_numbers.txt'
 
 #############################################################
 # Settings - output directory and files

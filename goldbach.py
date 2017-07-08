@@ -31,6 +31,7 @@ import numpy as np
 import os
 from datetime import datetime
 import time
+sys.path.insert(0, '..\\primes\\')
 import primes
 
 class GoldbachPartition:

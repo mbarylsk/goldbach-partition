@@ -33,9 +33,10 @@ import os
 from datetime import datetime
 import time
 import numpy
-import goldbach
-import primes
 import pickle
+import goldbach
+sys.path.insert(0, '..\\primes\\')
+import primes
 
 #############################################################
 # Settings - configuration
@@ -47,10 +48,10 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 10000000
+max_num = 1000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 100000
+checkpoint_value = 10
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -61,13 +62,12 @@ caching_primality_results = False
 
 # Algorithms to be checked
 algo_to_check = {'a1', 'a2', 'a3', 'a4', 'a5', 'a6'}
-algo_to_check = {'a2', 'a6'}
 
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
-file_input_primes = 't_prime_numbers.txt'
-file_input_nonprimes = 't_nonprime_numbers.txt'
+file_input_primes = '..\\primes\\t_prime_numbers.txt'
+file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 
 #############################################################
 # Settings - output directory and files

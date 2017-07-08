@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Marcin Barylski
+# Copyright (c) 2016 - 2017, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -29,8 +29,9 @@ import unittest
 import os
 import time
 import numpy as np
-import primes
 import goldbach
+sys.path.insert(0, '..\\primes\\')
+import primes
 
 #############################################################
 # Settings - configuration
@@ -53,8 +54,8 @@ caching_primality_results = False
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
-file_input_primes = 't_prime_numbers.txt'
-file_input_nonprimes = 't_nonprime_numbers.txt'
+file_input_primes = '..\\primes\\t_prime_numbers.txt'
+file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 
 #############################################################
 # Main
