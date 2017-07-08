@@ -72,8 +72,8 @@ algo_to_check = {'a1'}
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
-file_input_primes = '..\primes\t_prime_numbers.txt'
-file_input_nonprimes = '..\primes\t_nonprime_numbers.txt'
+file_input_primes = '..\\primes\\t_prime_numbers.txt'
+file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 
 #############################################################
 # Settings - output directory and files
