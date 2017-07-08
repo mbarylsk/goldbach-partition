@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Marcin Barylski
+# Copyright (c) 2016 - 2017, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -31,6 +31,7 @@ import os
 from datetime import datetime
 import time
 import goldbach
+sys.path.insert(0, '..\\primes\\')
 import primes
 
 #############################################################
@@ -58,14 +59,14 @@ checkpoint_value = 2000
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
-file_input_primes = 't_prime_numbers.txt'
-file_input_nonprimes = 't_nonprime_numbers.txt'
+file_input_primes = '..\\primes\\t_prime_numbers.txt'
+file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 
 #############################################################
 # Settings - output directory and files
 #############################################################
 
-directory = str(step_factor*max_num)
+directory = "results/" + str(step_factor*max_num)
 if not os.path.exists(directory):
     os.makedirs(directory)
 file_output_data_goldbach_reduction = directory + "/f_goldbach_reduction.csv"
@@ -75,7 +76,7 @@ file_output_data_goldbach_reduction = directory + "/f_goldbach_reduction.csv"
 #############################################################
 
 def file_init_header ():
-    header = "n,hypothesis_fullfiled?,p1,p2,n1,n2,q1,q2"
+    header = "n,hypothesis_fulfilled?,p1,p2,n1,n2,q1,q2"
     f = open(file_output_data_goldbach_reduction, "w+")
     f.write (header + "\n")
     f.close ()
@@ -122,7 +123,7 @@ for k in range (min_num, max_num):
         results = str(num) + ",True," + str(p1) + "," + str(p2) + "," + str(n1) + "," + str(n2) + "," + str(q1) + "," + str(q2)
     else:
         results = str(num) + ",False," + str(p1) + "," + str(p2) + "," + str(n1) + "," + str(n2) + "," + str(q1) + "," + str(q2)
-        raise ("Could not find reduction for" + num)
+        raise ("CouldNotFindReductionFor" + num)
 
     file_write_line (results)
 
