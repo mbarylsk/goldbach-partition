@@ -79,7 +79,7 @@ class GoldbachPartition:
                 p1 = p1 + delta (iteration)
                 p2 = p2 - delta (iteration)
             if p2 < 2 or p1 < 2:
-                raise ("CouldNotFindGP")
+                raise Exception ("Could not find GP")
         duration = time.time() - startTime
         return p1, p2, duration, iteration
 
@@ -109,16 +109,27 @@ class GoldbachPartition:
         duration = time.time() - startTime
         return p1, p2, duration, iteration
 
-    def reduce_prime_for_goldbach (self, p):
-        n = 1
+    def reduce_prime_for_goldbach (self, p, look_for_max):
+        if look_for_max:
+            n = int(math.log(p, 2))
+            diff = -1
+            min_num = 0
+        else:
+            n = 1
+            diff = 1
+            min_num = 2
         q = p
-        while (q > 2):
+        found = False
+        while (q > min_num):
             q = p - 2**n
             if self.primes.is_prime(q):
+                found = True
                 break
             else:
-                n += 1
-        return (n, q)
+                n += diff
+            if n < 1:
+                break
+        return (n, q, found)
 
     def divide_into_chunks (self, r, size):
         out = []

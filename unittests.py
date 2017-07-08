@@ -121,7 +121,7 @@ class TestMethods(unittest.TestCase):
         self.assertEqual (p2, 7)
         self.assertEqual (iterations, 2)
 
-    def test_sumofprimenumbers(self):
+    def test_sum_of_prime_numbers(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
         self.assertEqual(gp.find_sum_of_prime_numbers(4), [(2,2)])
@@ -146,6 +146,40 @@ class TestMethods(unittest.TestCase):
         self.assertEqual (p1, 5)
         self.assertEqual (p2, 11)
         self.assertEqual (iterations, 2)
+
+    def test_reduce_prime_for_goldbach_min(self):
+        p = primes.Primes(False)
+        gp = goldbach.GoldbachPartition (p)
+        p.sort_prime_set()
+        (n, q, res) = gp.reduce_prime_for_goldbach (5, False)
+        self.assertEqual (n, 1)
+        self.assertEqual (q, 3)
+        self.assertTrue (res)
+        (n, q, res) = gp.reduce_prime_for_goldbach (7, False)
+        self.assertEqual (n, 1)
+        self.assertEqual (q, 5)
+        self.assertTrue (res)
+        (n, q, res) = gp.reduce_prime_for_goldbach (11, False)
+        self.assertEqual (n, 2)
+        self.assertEqual (q, 7)
+        self.assertTrue (res)
+
+    def test_reduce_prime_for_goldbach_max(self):
+        p = primes.Primes(False)
+        gp = goldbach.GoldbachPartition (p)
+        p.sort_prime_set()
+        (n, q, res) = gp.reduce_prime_for_goldbach (5, True)
+        self.assertEqual (n, 1)
+        self.assertEqual (q, 3)
+        self.assertTrue (res)
+        (n, q, res) = gp.reduce_prime_for_goldbach (7, True)
+        self.assertEqual (n, 2)
+        self.assertEqual (q, 3)
+        self.assertTrue (res)
+        (n, q, res) = gp.reduce_prime_for_goldbach (11, True)
+        self.assertEqual (n, 3)
+        self.assertEqual (q, 3)
+        self.assertTrue (res)
 
     def test_divide(self):
         p = primes.Primes(False)

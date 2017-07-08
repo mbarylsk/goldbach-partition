@@ -46,6 +46,11 @@ step_factor = 2
 #   o number = max_num * step_factor
 max_num = 20000
 
+# Searching for max reduction
+#   o True  - maximum 2^n
+#   o False - minimal 2^n
+search_for_max_reduction = False
+
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
 #             it will speed up further primality tests but more RAM will
@@ -112,18 +117,38 @@ for k in range (min_num, max_num):
     factors = gp.find_sum_of_prime_numbers (num)
 
     found = False
+    max_q = 0
+    max_q1 = 0
+    max_q2 = 0
+    max_n1 = 0
+    max_n2 = 0
+    max_p1 = 0
+    max_p2 = 0
     for (p1, p2) in factors:
-        (n1, q1) = gp.reduce_prime_for_goldbach (p1)
-        (n2, q2) = gp.reduce_prime_for_goldbach (p2)
-        if (q1 >= 2) and (q2 >= 2):
-            found = True
-            break
-            
+        (n1, q1, res) = gp.reduce_prime_for_goldbach (p1, search_for_max_reduction)
+        (n2, q2, res) = gp.reduce_prime_for_goldbach (p2, search_for_max_reduction)
+
+        if search_for_max_reduction:
+            if q1 + q2 > max_q:
+                max_q1 = q1
+                max_q2 = q2
+                max_n1 = n1
+                max_n2 = n2
+                max_p1 = p1
+                max_p2 = p2
+        else:
+            if (q1 >= 2) and (q2 >= 2):
+                found = True
+                break
+
     if found:
-        results = str(num) + ",True," + str(p1) + "," + str(p2) + "," + str(n1) + "," + str(n2) + "," + str(q1) + "," + str(q2)
+        if search_for_max_reduction:
+            results = str(num) + ",True," + str(max_p1) + "," + str(max_p2) + "," + str(max_n1) + "," + str(max_n2) + "," + str(max_q1) + "," + str(max_q2)
+        else:
+            results = str(num) + ",True," + str(p1) + "," + str(p2) + "," + str(n1) + "," + str(n2) + "," + str(q1) + "," + str(q2)
+
     else:
-        results = str(num) + ",False," + str(p1) + "," + str(p2) + "," + str(n1) + "," + str(n2) + "," + str(q1) + "," + str(q2)
-        raise ("CouldNotFindReductionFor" + num)
+        Exception ("Could not find reduction")
 
     file_write_line (results)
 
