@@ -6,8 +6,8 @@ _2n_ = _p_ + _q_
 
 where:
 
-..* _n_ >=2, 
-..* _p_ and _q_ are prime numbers 
+  * _n_ >=2, 
+  * _p_ and _q_ are prime numbers 
 
 So far (by 2017) GP has not been proven yet, although has been computationally verified up to _4 × 10^18_.
 
