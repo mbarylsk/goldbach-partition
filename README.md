@@ -23,7 +23,7 @@ Search for GP is successful if both components are primes. _goldbach-fast_conf-p
 
 _goldbach-fast_conf-sum_build.py_ is examining how fast it is possible to build even integers from a set of already known prime numbers.
 
-## Auxilary script - reduction
+## Auxiliary script - reduction of primes
 
 _goldbach-reduction.py_ verifies if two primes from at least one GP can be lowered by 2^x (x >= 1), still remaining prime numbers. It is examining hypothesis that:
 
