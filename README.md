@@ -10,9 +10,9 @@ where:
   * _p_ and _q_ are prime numbers 
 
 So far (by 2017) GSC has not been proven yet, although has been computationally verified up to _4 × 10^18_ in: 
-_Tomás Oliveira e Silva, Siegfried Herzog, and Silvio Pardi, Empirical verification of the even Goldbach conjecture 
-and computation of prime gaps up to 4·10^18, Mathematics of Computation, vol. 83, no. 288, pp. 2033-2060, July 2014 
-(published electronically on November 18, 2013)_.
+Tomás Oliveira e Silva, Siegfried Herzog, and Silvio Pardi, _Empirical verification of the even Goldbach conjecture 
+and computation of prime gaps up to 4·10^18_, Mathematics of Computation, vol. 83, no. 288, pp. 2033-2060, July 2014 
+(published electronically on November 18, 2013).
 Expression of even integer as a sum of two primes is called Goldbach Partition (GP).
 
 This framework is used to find the fastest computational confirmation method of GSC.
