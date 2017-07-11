@@ -44,7 +44,7 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 20000
+max_num = 20000000
 
 # Searching for max reduction
 #   o True  - maximum 2^n
@@ -59,7 +59,7 @@ search_for_max_reduction = True
 caching_primality_results = False
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 2000
+checkpoint_value = 200000
 
 # Helper files
 #   o file_input_primes - contains prime numbers
