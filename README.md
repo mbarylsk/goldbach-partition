@@ -7,7 +7,7 @@ _2n_ = _p_ + _q_
 where:
 
   * _n_ >= 2, 
-  * _p_ and _q_ are prime numbers 
+  * both _p_ and _q_ are prime numbers 
 
 So far (by 2017) GSC has not been proven yet, although has been computationally verified up to _4 × 10^18_ in: 
 Tomás Oliveira e Silva, Siegfried Herzog, and Silvio Pardi, _Empirical verification of the even Goldbach conjecture 
@@ -22,7 +22,7 @@ This framework is used to find the fastest computational confirmation method of 
 _goldbach-fast_conf-prim_check.py_ is examining 6 different approach which are based on iteration over even integers, decomposition to two integers and final primality check of both components.
 Search for GP is successful if both components are primes. _goldbach-fast_conf-prim_check-distr.py_ is a distributed version of this approach.
 
-## Methods based on possible sum building from already known prime numbers
+## Methods based on sum building from already known prime numbers
 
 _goldbach-fast_conf-sum_build.py_ is examining how fast it is possible to build even integers from a set of already known prime numbers.
 
@@ -37,7 +37,7 @@ where:
   * _n_ >= 2
   * _a_ >= 1
   * _b_ >= 1
-  * p and q are primes
+  * both _p_ and _q_ are primes
 
 ## Dependencies
 
