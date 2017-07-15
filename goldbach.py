@@ -130,11 +130,3 @@ class GoldbachPartition:
             if n < 1:
                 break
         return (n, q, found)
-
-    def divide_into_chunks (self, r, size):
-        out = []
-        last = 0
-        while last < len(r):
-            out.append (r[int(last):int(last + size)])
-            last += size
-        return out

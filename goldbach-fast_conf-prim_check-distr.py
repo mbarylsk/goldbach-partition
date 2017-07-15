@@ -30,8 +30,10 @@ import os
 import time
 import numpy as np
 import goldbach
+import sys
 sys.path.insert(0, '..\\primes\\')
 import primes
+import dataprocessing
 
 #############################################################
 # Settings - configuration
@@ -64,6 +66,7 @@ file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 print ("Initialize objects...")
 p = primes.Primes(caching_primality_results)
 gp = goldbach.GoldbachPartition (p)
+dp = dataprocessing.DataProcessing()
 print ("DONE")
 print ("Loading helper sets...")
 p.init_set(file_input_primes, True)
@@ -76,7 +79,7 @@ print ("DONE")
 print ("Verification for all even numbers from", minimum_n, "to", maximum_n, "started ...")
 i = 1
 n_of_chunks = (maximum_n - minimum_n) / 2 / max_chunk_size
-chunks = gp.divide_into_chunks (range(minimum_n, maximum_n, 2), max_chunk_size)
+chunks = dp.divide_list_into_chunks (range(minimum_n, maximum_n, 2), max_chunk_size)
 
 for chunk in chunks:
     for n in chunk:
