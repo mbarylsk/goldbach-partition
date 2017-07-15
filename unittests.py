@@ -29,6 +29,7 @@ import unittest
 import goldbach
 sys.path.insert(0, '..\\primes\\')
 import primes
+import dataprocessing
 
 #############################################################
 # Unit tests
@@ -182,12 +183,69 @@ class TestMethods(unittest.TestCase):
         self.assertTrue (res)
 
     def test_divide(self):
-        p = primes.Primes(False)
-        gp = goldbach.GoldbachPartition (p)
-        res = gp.divide_into_chunks(range(10), 5)
+        dp = dataprocessing.DataProcessing ()
+        res = dp.divide_list_into_chunks(range(10), 5)
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0], range(0,5))
         self.assertEqual(res[1], range(5,10))
+
+    def test_get_max_factor(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_max_factor([(3,5)]), 5)
+        self.assertEqual(dp.get_max_factor([(5,3)]), 5)
+        self.assertEqual(dp.get_max_factor([(3,3)]), 3)
+
+    def test_get_min_factor(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_min_factor([(3,5)]), 3)
+        self.assertEqual(dp.get_min_factor([(5,3)]), 3)
+        self.assertEqual(dp.get_min_factor([(3,3)]), 3)
+        self.assertEqual(dp.get_min_factor([(3,3),(5,7)]), 3)
+
+    def test_get_avg_factor(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_avg_factor([(3,5)]), 4)
+        self.assertEqual(dp.get_avg_factor([(5,3)]), 4)
+        self.assertEqual(dp.get_avg_factor([(3,3)]), 3)
+        self.assertEqual(dp.get_avg_factor([(7,5),(2,11)]), 6.25)
+
+    def test_get_perc_max_saturation_from_factors(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_perc_max_saturation_from_factors(4, [(2,2)]), 50)
+        self.assertEqual(dp.get_perc_max_saturation_from_factors(8, [(3,5)]), 62.5)
+
+    def test_get_max_value_from_list(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_max_value_from_list([1, 2, 3]), 3)
+        self.assertEqual(dp.get_max_value_from_list([3, 2, 1]), 3)
+        self.assertEqual(dp.get_max_value_from_list([1, 3, 2]), 3)
+        self.assertEqual(dp.get_max_value_from_list([32, 32, 32]), 32)
+
+    def test_get_min_value_from_list(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_min_value_from_list([1, 2, 3]), 1)
+        self.assertEqual(dp.get_min_value_from_list([2, 1, 3]), 1)
+        self.assertEqual(dp.get_min_value_from_list([3, 2, 1]), 1)
+
+    def test_get_avg_value_from_list(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_avg_value_from_list([1, 2, 3]), 2)
+        self.assertEqual(dp.get_avg_value_from_list([2, 1, 3]), 2)
+        self.assertEqual(dp.get_avg_value_from_list([3, 2, 1]), 2)
+        self.assertEqual(dp.get_avg_value_from_list([5]), 5)
+        self.assertEqual(dp.get_avg_value_from_list([3, 2, 1, 10]), 4)
+
+    def test_get_number_of_pairs(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_number_of_pairs([(2,3)]), 1)
+        self.assertEqual(dp.get_number_of_pairs([]), 0)
+        self.assertEqual(dp.get_number_of_pairs([(2,3), (5,7)]), 2)
+
+    def test_get_diff_in_factors(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_diff_in_factors([(2,3)]), [1])
+        self.assertEqual(dp.get_diff_in_factors([(2,5),(2,3)]), [3,1])
+        self.assertEqual(dp.get_diff_in_factors([(2,5),(3,2)]), [3,-1])
 
 #############################################################
 # Main - run unit tests
