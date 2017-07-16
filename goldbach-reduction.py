@@ -74,7 +74,10 @@ file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 directory = "results/" + str(step_factor*max_num)
 if not os.path.exists(directory):
     os.makedirs(directory)
-file_output_data_goldbach_reduction = directory + "/f_goldbach_reduction.csv"
+if search_for_max_reduction:    
+    file_output_data_goldbach_reduction = directory + "/f_goldbach_reduction_max.csv"
+else:
+    file_output_data_goldbach_reduction = directory + "/f_goldbach_reduction_min.csv"
 
 #############################################################
 # Presentation

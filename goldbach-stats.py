@@ -24,7 +24,6 @@
 # OF SUCH DAMAGE.
 # 
 
-import unittest
 import math
 import sys
 import matplotlib.pyplot as plt
@@ -42,11 +41,14 @@ import dataprocessing
 # Settings - configuration
 #############################################################
 
-# set to True if you want to run unit tests
-run_unit_tests = True
 # set to True if you want to see more output during calculations
 be_verbose = False
 
+# Caching previous primality results
+#   o True  - auxilary sets of primes and composite numbers will grow
+#             it will speed up further primality tests but more RAM will
+#             be occupied
+#   o False - do not cache new primality test results
 caching_primality_results = False
 
 min_num = 2
@@ -156,33 +158,6 @@ def calculate_metrics (num, factors, dp):
     prev_max_diff = max_diff
     prev_min_diff = min_diff
     prev_avg_diff = avg_diff
-
-def read_sum_of_prime_numbers_from_line_of_file (line): 
-    line = line.replace('Pairs: ', '')
-    line = line.replace('[', '')
-    line = line.replace(']', '')
-    line = line.replace('(', '')
-    line = line.replace(')', '')
-    line = line.replace('\n', '')
-    line = line.replace(' ', '')
-    numbers = line.split(',')
-    read_second_number = False
-    factors_from_file = []
-    for number in numbers:
-        if read_second_number:
-            p2 = int(number)
-            pair = (p1, p2)
-            factors_from_file.append (pair)
-            read_second_number = False
-        else:
-            p1 = int(number)
-            read_second_number = True
-    return factors_from_file
-
-def read_num_from_line_of_file (line):
-    line = line.replace('Number: ', '')
-    num_from_file = int(line)
-    return num_from_file
 
 #############################################################
 # Presentation
@@ -326,22 +301,22 @@ def write_results_to_figures (directory, last_loop):
     plt.savefig(directory + "/f_min_prime_in_sum_histogram.png")
 
 #############################################################
-# Unit tests
-#############################################################
-
-class TestPrimeMethods(unittest.TestCase):
-    def test_read_num_from_line_of_file (self):
-        self.assertEqual(read_num_from_line_of_file ("Number: 10"), 10)
-        self.assertEqual(read_num_from_line_of_file ("Number: 34453432"), 34453432)
-
-    def test_read_sum_of_prime_numbers_from_line_of_file (self):
-        self.assertEqual(read_sum_of_prime_numbers_from_line_of_file (" Pairs: [(3, 7), (5, 5)]"), [(3, 7), (5, 5)])
-        self.assertEqual(read_sum_of_prime_numbers_from_line_of_file (" Pairs: [(7, 83), (11, 79), (17, 73), (19, 71), (23, 67), (29, 61), (31, 59), (37, 53), (43, 47)]"), [(7, 83), (11, 79), (17, 73), (19, 71), (23, 67), (29, 61), (31, 59), (37, 53), (43, 47)])
-
-#############################################################
 # Main - Phase 1
 # Preload files & restore previous calculations
 #############################################################
+
+print ("Initialize objects...")
+p = primes.Primes(caching_primality_results)
+gp = goldbach.GoldbachPartition (p)
+dp = dataprocessing.DataProcessing()
+print ("DONE")
+print ("Loading helper sets...")
+p.init_set(file_input_primes, True)
+p.init_set(file_input_nonprimes, False)
+print ("DONE")
+print ("Sorting primes...")
+p.sort_prime_set()
+print ("DONE")
 
 if os.path.exists(file_input_oldpairs):
     print ("Restoration of previous calculations started ...")
@@ -353,7 +328,7 @@ if os.path.exists(file_input_oldpairs):
             read_pairs = False
 
             # read factors from file and calculate metrics
-            factors_from_file = read_sum_of_prime_numbers_from_line_of_file (line)
+            factors_from_file = dp.read_sums_from_line (line)
             calculate_metrics (num_from_file, factors_from_file)
 
             # auxilary results - prime numbers
@@ -373,7 +348,7 @@ if os.path.exists(file_input_oldpairs):
             read_pairs = True
 
             # read number from file
-            num_from_file = read_num_from_line_of_file (line)
+            num_from_file = dp.read_num_from_line (line)
 
             if num_from_file % checkpoint_value == 0:
                 print (".")
@@ -386,19 +361,6 @@ if os.path.exists(file_input_oldpairs):
 # Main - Phase 2
 # New calculations
 #############################################################
-
-print ("Initialize objects...")
-p = primes.Primes(caching_primality_results)
-gp = goldbach.GoldbachPartition (p)
-dp = dataprocessing.DataProcessing()
-print ("DONE")
-print ("Loading helper sets...")
-p.init_set(file_input_primes, True)
-p.init_set(file_input_nonprimes, False)
-print ("DONE")
-print ("Sorting primes...")
-p.sort_prime_set()
-print ("DONE")
 
 dt_start = datetime.now()
 dt_current_previous = dt_start

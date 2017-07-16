@@ -97,3 +97,30 @@ class DataProcessing:
             out.append (r[int(last):int(last + size)])
             last += size
         return out
+
+    def read_sums_from_line (self, line): 
+        line = line.replace('Pairs: ', '')
+        line = line.replace('[', '')
+        line = line.replace(']', '')
+        line = line.replace('(', '')
+        line = line.replace(')', '')
+        line = line.replace('\n', '')
+        line = line.replace(' ', '')
+        numbers = line.split(',')
+        read_second_number = False
+        factors_from_file = []
+        for number in numbers:
+            if read_second_number:
+                p2 = int(number)
+                pair = (p1, p2)
+                factors_from_file.append (pair)
+                read_second_number = False
+            else:
+                p1 = int(number)
+                read_second_number = True
+        return factors_from_file
+
+    def read_num_from_line (self, line):
+        line = line.replace('Number: ', '')
+        num_from_file = int(line)
+        return num_from_file

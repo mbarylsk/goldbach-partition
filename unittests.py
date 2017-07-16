@@ -247,6 +247,16 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(dp.get_diff_in_factors([(2,5),(2,3)]), [3,1])
         self.assertEqual(dp.get_diff_in_factors([(2,5),(3,2)]), [3,-1])
 
+    def test_read_num_from_line (self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.read_num_from_line ("Number: 10"), 10)
+        self.assertEqual(dp.read_num_from_line ("Number: 34453432"), 34453432)
+
+    def test_read_sums_from_line (self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.read_sums_from_line (" Pairs: [(3, 7), (5, 5)]"), [(3, 7), (5, 5)])
+        self.assertEqual(dp.read_sums_from_line (" Pairs: [(7, 83), (11, 79), (17, 73), (19, 71), (23, 67), (29, 61), (31, 59), (37, 53), (43, 47)]"), [(7, 83), (11, 79), (17, 73), (19, 71), (23, 67), (29, 61), (31, 59), (37, 53), (43, 47)])
+
 #############################################################
 # Main - run unit tests
 #############################################################
