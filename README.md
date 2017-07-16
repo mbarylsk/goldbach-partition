@@ -39,6 +39,22 @@ where:
   * _b_ >= 1
   * both _p_ and _q_ are primes
 
+## Auxiliary script - GSC statistics
+
+_goldbach_stats.py_ is calculating all possible sum of primes for consequtive even integers first, then is presenting various interesting statistical properties of GPs like:
+
+  * number of elements in _R(n)_ (so called Goldbach comet)
+  * min/max/avg difference in _R(n)_
+  * trens of max difference in _R(n)_
+  * minimal prime in _R(n)_
+  * histogram of minimal primes
+  * participation of max/min/avg prime from _R(n)_ in _n_
+
+where:
+
+  * _R(n)_ is a set of all possible GPs for _n_
+  * _n_ is an even integer
+ 
 ## Dependencies
 
 Framework depends on https://github.com/mbarylsk/primes which is supporting all required operations on prime numbers.
