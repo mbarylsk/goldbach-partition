@@ -52,14 +52,14 @@ be_verbose = False
 caching_primality_results = False
 
 min_num = 2
-max_num = 4500
+max_num = 10000
 step_factor = 2
 checkpoint_value = 1000
-big_prime_threshold = 300
+big_prime_threshold = 20
 min_prime_count_threshold = 500
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
 file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
-file_input_oldpairs = 'input\\t_prime_sum_pairs_below_1000000.txt'
+file_input_oldpairs = 'input\\t_prime_sum_pairs.txt'
 
 #############################################################
 # Settings - output directory and files
@@ -69,11 +69,11 @@ directory = "results/" + str(step_factor*max_num)
 if not os.path.exists(directory):
     os.makedirs(directory)
 
-f = open(directory + "t_prime_sum_pairs.txt", "w")
-f.close ()
-f = open(directory + "t_big_smallest_primes.txt", "w")
-f.write ("Big prime number threshold for the smallest prime in sum: " + str(big_prime_threshold) + "\n")
-f.close ()
+file_output_primes_lower_than = directory + "/t_prime_numbers_lower_than_" + str(step_factor*max_num) + ".txt"
+file_output_nonprimes_lower_than = directory + "/t_nonprime_numbers_lower_than_" + str(step_factor*max_num) + ".txt"
+file_output_primes_frequency_lower_than = directory + "/t_min_prime_numbers_freq_lower_than_" + str(step_factor*max_num) + ".txt"
+file_output_prime_sum_pairs_below = directory + "/t_prime_sum_pairs_below_" + str(step_factor*max_num) + ".txt"
+file_output_big_smallest_primes_below = directory + "/t_big_smallest_primes_below_" + str(step_factor*max_num) + ".txt"
 
 #############################################################
 # Business logic
@@ -105,7 +105,8 @@ dict_min_primes_count = dict()
 min_prime = 0
 
 def calculate_metrics (num, factors, dp):
-    global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor
+    global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
+
     list_nums.append(num)
     
     min_prime = dp.get_min_factor (factors)
@@ -164,18 +165,7 @@ def calculate_metrics (num, factors, dp):
 #############################################################
 
 def print_iteration_output ():
-    global num
-    global factors
-    global max_sat
-    global min_sat
-    global diffs_in_factors
-    global num_of_pairs
-    global prev_max_diff
-    global prev_min_diff
-    global prev_avg_diff
-    global max_diff_trend_factor
-    global min_diff_trend_factor
-    global avg_diff_trend_factor
+    global num, factors, max_sat, min_sat, diffs_in_factors, num_of_pairs, prev_max_diff, prev_min_diff, prev_avg_diff, max_diff_trend_factor, min_diff_trend_factor, avg_diff_trend_factor
     print ("=============================================================")
     print ("n to be analyzed: %d" % num)
     print ("n = p1 + p2: ", factors)
@@ -186,23 +176,64 @@ def print_iteration_output ():
     print (prev_max_diff, prev_min_diff, prev_avg_diff)
     print (max_diff_trend_factor, min_diff_trend_factor, avg_diff_trend_factor)
 
-def write_results_to_files (directory):
-    f = open(directory + "/t_prime_numbers_lower_than_" + directory + ".txt", "w")
-    list_prime_sorted = sorted(set_prime)
-    f.write (str(list_prime_sorted))
+def write_results_to_files (directory, p):
+    global file_output_primes_lower_than, file_output_nonprimes_lower_than, file_output_primes_frequency_lower_than
+    
+    f = open(file_output_primes_lower_than, "w")
+    f.write (str(p.get_list_sorted_prime()))
     f.close ()
 
-    f = open(directory + "/t_nonprime_numbers_lower_than_" + directory + ".txt", "w")
-    list_nonprime_sorted = sorted(set_nonprime)
-    f.write (str(list_nonprime_sorted))
+    f = open(file_output_nonprimes_lower_than, "w")
+    f.write (str(get_list_sorted_nonprime()))
     f.close ()
 
-    f = open(directory + "/t_min_prime_numbers_freq_lower_than_" + directory + ".txt", "w")
+    f = open(file_output_primes_frequency_lower_than, "w")
     for key in sorted(dict_min_primes_count.keys()):
         ikey = int(key)
         ivalue = int(dict_min_primes_count[key])
         f.write (str(ikey) + "->" + str(ivalue) + "\n")
     f.close ()
+
+def write_auxiliary_results_to_file (directory, num, factors):
+    global big_prime_threshold, min_prime, file_output_prime_sum_pairs_below, file_output_big_smallest_primes_below
+
+    # prime numbers
+    f = open(file_output_prime_sum_pairs_below, "a+")
+    f.write ("Number: " + str(num) + "\n")
+    f.write (" Pairs: " + str(factors) + "\n")
+    f.close ()
+
+    # search for big minimal primes
+    if min_prime > big_prime_threshold:
+        f = open(file_output_big_smallest_primes_below, "a+")
+        f.write ("Number: " + str(num) + "\n")
+        f.write (" Minimum prime: " + str(min_prime) + "\n")
+        f.close ()
+
+def read_results_from_file (file_input_oldpairs, dp):
+    
+    f = open(file_input_oldpairs, "r")
+    lines = f.readlines()
+    read_pairs = False
+    for line in lines:
+        if read_pairs:
+            read_pairs = False
+
+            # read factors from file and calculate metrics
+            factors_from_file = dp.read_sums_from_line (line)
+            calculate_metrics (num_from_file, factors_from_file, dp)
+
+            write_auxiliary_results_to_file (directory, num_from_file, factors_from_file)         
+        else:
+            read_pairs = True
+
+            # read number from file
+            num_from_file = dp.read_num_from_line (line)
+
+            if num_from_file % checkpoint_value == 0:
+                print (".")
+
+    return num_from_file
 
 def write_results_to_figures (directory, last_loop):
     # results - figures
@@ -320,40 +351,8 @@ print ("DONE")
 
 if os.path.exists(file_input_oldpairs):
     print ("Restoration of previous calculations started ...")
-    f = open(file_input_oldpairs, "r")
-    lines = f.readlines()
-    read_pairs = False
-    for line in lines:
-        if read_pairs:
-            read_pairs = False
-
-            # read factors from file and calculate metrics
-            factors_from_file = dp.read_sums_from_line (line)
-            calculate_metrics (num_from_file, factors_from_file)
-
-            # auxilary results - prime numbers
-            f = open(directory + "/t_prime_sum_pairs_below_" + directory + ".txt", "a+")
-            f.write ("Number: " + str(num_from_file) + "\n")
-            f.write (" Pairs: " + str(factors_from_file) + "\n")
-            f.close ()
-
-            # results - search for big minimal primes
-            if min_prime > big_prime_threshold:
-                f = open(directory + "/t_big_smallest_primes_below_" + directory + ".txt", "a+")
-                f.write ("Number: " + str(num_from_file) + "\n")
-                f.write (" Minimum prime: " + str(min_prime) + "\n")
-                f.close ()
-            
-        else:
-            read_pairs = True
-
-            # read number from file
-            num_from_file = dp.read_num_from_line (line)
-
-            if num_from_file % checkpoint_value == 0:
-                print (".")
-
-    # take into consideration previous result read from file
+    
+    num_from_file = read_results_from_file (file_input_oldpairs, dp)
     min_num = int(num_from_file / step_factor)
     print ("Restoration of previous", min_num, "calculations has been completed.")
 
@@ -382,18 +381,7 @@ for k in range (min_num, max_num):
         # remember results so far
         write_results_to_figures (directory, False)
 
-    # auxilary results - prime numbers
-    #f = open(directory + "/t_prime_sum_pairs_below_" + directory + ".txt", "a+")
-    #f.write ("Number: " + str(num) + "\n")
-    #f.write (" Pairs: " + str(factors) + "\n")
-    #f.close ()
-
-    # results - search for big minimal primes
-    #if min_prime > big_prime_threshold:
-    #    f = open(directory + "/t_big_smallest_primes_below_" + directory + ".txt", "a+")
-    #    f.write ("Number: " + str(num) + "\n")
-    #    f.write (" Minimum prime: " + str(min_prime) + "\n")
-    #    f.close ()
+    write_auxiliary_results_to_file (directory, num, factors)
 
     if be_verbose:
         print_iteration_output ()
