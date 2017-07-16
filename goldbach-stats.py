@@ -52,10 +52,10 @@ be_verbose = False
 caching_primality_results = False
 
 min_num = 2
-max_num = 10000
+max_num = 100000
 step_factor = 2
 checkpoint_value = 1000
-big_prime_threshold = 20
+big_prime_threshold = 100
 min_prime_count_threshold = 500
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
 file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
@@ -99,8 +99,6 @@ prev_avg_diff = 0
 max_diff_trend_factor = 0
 min_diff_trend_factor = 0
 avg_diff_trend_factor = 0
-set_prime = set ()
-set_nonprime = set ()
 dict_min_primes_count = dict()
 min_prime = 0
 
