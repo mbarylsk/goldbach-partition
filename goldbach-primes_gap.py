@@ -85,7 +85,6 @@ dt_iter = [0]
 
 list_checkpoints = []
 list_checkpoints_primes = []
-list_checkpoints_even = []
 list_checkpoints_ratio = []
 list_checkpoints_ratio_avg = []
 list_checkpoints_max_diff = []
@@ -108,7 +107,7 @@ def write_results_to_figures (directory):
     plt.close(fig1)
 
     fig2 = plt.figure(2)
-    plt.plot(list_checkpoints_even, list_checkpoints_ratio, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_ratio, 'g.', ms=2)
     plt.xlabel('n')
     plt.ylabel('Ratio')
     plt.title('Ratio: # of GPs / # of symmetric primes')
@@ -144,7 +143,7 @@ def write_results_to_figures (directory):
     plt.close(fig5)
 
     fig6 = plt.figure(6)
-    plt.plot(list_checkpoints_even, list_checkpoints_ratio_avg, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_ratio_avg, 'g.', ms=2)
     plt.xlabel('n')
     plt.ylabel('Avg(Ratio)')
     plt.title('Average ratio: # of GPs / # of symmetric primes')
@@ -196,12 +195,10 @@ for num in range (min_num, max_num):
     list_checkpoints_min_index.append (min_index)
     list_checkpoints_max_index.append (max_index)
 
-    if num % 2 == 0:
-        factors = gp.find_sum_of_prime_numbers (num)
-        list_checkpoints_even.append (num)
-        list_checkpoints_ratio.append (dp.get_number_of_pairs (factors) / count)
-        avg_ratio = dp.get_avg_value_from_list (list_checkpoints_ratio)
-        list_checkpoints_ratio_avg.append (avg_ratio)
+    factors = gp.find_sum_of_prime_numbers (2 * num)
+    list_checkpoints_ratio.append (dp.get_number_of_pairs (factors) / count)
+    avg_ratio = dp.get_avg_value_from_list (list_checkpoints_ratio)
+    list_checkpoints_ratio_avg.append (avg_ratio)
 
     if count == 0:
         print ("WARNING: For n=", n, "no symmetric primes found")
