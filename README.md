@@ -54,7 +54,14 @@ where:
 
   * _R(n)_ is a set of all possible GPs for _n_
   * _n_ is an even integer
- 
+
+## Auxiliary script - symmetrical primes
+
+_goldbach-prime_gap.py_ is checking relations between GP and so called symmetrical primes. We can rewrite GSC to the following form: all positive integers > 1 can be expressed as a half of sum of two primes
+This means that every positive integer _n_ > 1 can be treated as a symmetry point for two primes _p_ and _q_:
+
+_n_ = (_p_ + _q_) / 2
+  
 ## Dependencies
 
 Framework depends on https://github.com/mbarylsk/primes which is supporting all required operations on prime numbers.
