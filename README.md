@@ -59,18 +59,18 @@ where:
 
 _goldbach-prime_gap.py_ is checking relations between GP and so called symmetrical primes. We can rewrite GSC to the following form: 
 
-  All positive integers > 1 can be expressed as a half of sum of two primes.
+ "All positive integers > 1 can be expressed as a half of sum of two primes."
 
 This means that every positive integer _n_ > 1 can be treated as a symmetry point for two primes _p_ and _q_:
 
 _n_ = (_p_ + _q_) / 2
  
-This means that there exists integer i >= 0 that:
+This also means that for every integer _n_ > 1 there exists yet another integer _i_ >= 0 that:
 
-_p_ = _n_ - _i_
-_q_ = _n_ + _i_
+ * _p_ = _n_ - _i_
+ * _q_ = _n_ + _i_
 
-where _p_ and _q_ are primes (_p_ <= _q_)
+where _p_ and _q_ are primes (_p_ <= _q_).
   
 ## Dependencies
 
