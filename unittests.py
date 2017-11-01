@@ -84,11 +84,11 @@ class TestMethods(unittest.TestCase):
     def test_search_for_partition_a1(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
-        (p1, p2, duration, iterations) = gp.search_for_partition (5, 7, lambda iteration: gp.delta_constant_minus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (5, 7, lambda iteration: gp.delta_constant_minus_2(iteration))
         self.assertEqual (p1, 5)
         self.assertEqual (p2, 7)
         self.assertEqual (iterations, 1)
-        (p1, p2, duration, iterations) = gp.search_for_partition (7, 9, lambda iteration: gp.delta_constant_minus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (7, 9, lambda iteration: gp.delta_constant_minus_2(iteration))
         self.assertEqual (p1, 5)
         self.assertEqual (p2, 11)
         self.assertEqual (iterations, 2)
@@ -96,11 +96,11 @@ class TestMethods(unittest.TestCase):
     def test_search_for_partition_a2(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
-        (p1, p2, duration, iterations) = gp.search_for_partition (3, 7, lambda iteration: gp.delta_constant_plus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (3, 7, lambda iteration: gp.delta_constant_plus_2(iteration))
         self.assertEqual (p1, 3)
         self.assertEqual (p2, 7)
         self.assertEqual (iterations, 1)
-        (p1, p2, duration, iterations) = gp.search_for_partition (3, 9, lambda iteration: gp.delta_constant_plus(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (3, 9, lambda iteration: gp.delta_constant_plus_2(iteration))
         self.assertEqual (p1, 5)
         self.assertEqual (p2, 7)
         self.assertEqual (iterations, 2)
@@ -120,6 +120,18 @@ class TestMethods(unittest.TestCase):
         (p1, p2, duration, iterations) = gp.search_for_partition (3, 9, lambda iteration: gp.delta_prime(iteration))
         self.assertEqual (p1, 5)
         self.assertEqual (p2, 7)
+        self.assertEqual (iterations, 2)
+
+    def test_search_for_sym_primes_a1(self):
+        p = primes.Primes(False)
+        gp = goldbach.GoldbachPartition (p)
+        (p1, p2, duration, iterations) = gp.search_for_sym_primes (2, lambda iteration: gp.delta_constant_minus_1(iteration))
+        self.assertEqual (p1, 2)
+        self.assertEqual (p2, 2)
+        self.assertEqual (iterations, 1)
+        (p1, p2, duration, iterations) = gp.search_for_sym_primes (4, lambda iteration: gp.delta_constant_minus_1(iteration))
+        self.assertEqual (p1, 3)
+        self.assertEqual (p2, 5)
         self.assertEqual (iterations, 2)
 
     def test_sum_of_prime_numbers(self):

@@ -42,11 +42,14 @@ class GoldbachPartition:
     def __init__(self, p):
         self.primes = p
     
-    def delta_constant_plus (self, iteration):
+    def delta_constant_plus_2 (self, iteration):
         return 2
 
-    def delta_constant_minus (self, iteration):
+    def delta_constant_minus_2 (self, iteration):
         return -2
+
+    def delta_constant_minus_1 (self, iteration):
+        return -1
 
     def delta_variable (self, iteration):
         if iteration == 0:
@@ -80,6 +83,25 @@ class GoldbachPartition:
                 p2 = p2 - delta (iteration)
             if p2 < 2 or p1 < 2:
                 raise Exception ("Could not find GP")
+        duration = time.time() - startTime
+        return p1, p2, duration, iteration
+
+    def search_for_sym_primes (self, num, delta):
+        found = False
+        iteration = 0
+
+        startTime = time.time()
+        p1 = num
+        p2 = num
+        while (not found):
+            iteration += 1
+            if (self.primes.is_prime (p1) and self.primes.is_prime (p2)):
+                found = True
+            if (not found):
+                p1 = p1 + delta (iteration)
+                p2 = p2 - delta (iteration)
+            if p2 < 2 or p1 < 2:
+                raise Exception ("Could not find symmetrical primes")
         duration = time.time() - startTime
         return p1, p2, duration, iteration
 

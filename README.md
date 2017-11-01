@@ -17,7 +17,7 @@ Expression of even integer as a sum of two primes is called Goldbach Partition (
 
 This framework is used to find the fastest computational confirmation method of GSC.
   
-## Methods based on primality check of components of 2n
+## Methods based on primality check of components of _2n_
 
 _goldbach-fast_conf-prim_check.py_ is examining 6 different approach which are based on iteration over even integers, decomposition to two integers and final primality check of both components.
 Search for GP is successful if both components are primes. _goldbach-fast_conf-prim_check-distr.py_ is a distributed version of this approach.
@@ -25,6 +25,10 @@ Search for GP is successful if both components are primes. _goldbach-fast_conf-p
 ## Methods based on sum building from already known prime numbers
 
 _goldbach-fast_conf-sum_build.py_ is examining how fast it is possible to build even integers from a set of already known prime numbers.
+
+## Methods based on search for symmetrical primes to _n_
+
+_goldbach-fast_conf-sym_primes.py_ is examining how fast it is possible to find two primes which are symmetrical to given integer which is also confirming GSC.
 
 ## Auxiliary script - reduction of primes
 
@@ -41,7 +45,7 @@ where:
 
 ## Auxiliary script - GSC statistics
 
-_goldbach_stats.py_ is calculating all possible sum of primes for consequtive even integers first, then is presenting various interesting statistical properties of GPs like:
+_goldbach_stats.py_ is calculating all possible sums of primes for consequtive even integers first, then is presenting various interesting statistical properties of GPs like:
 
   * number of elements in _R(n)_ (so called Goldbach comet)
   * min/max/avg difference in _R(n)_
@@ -53,9 +57,9 @@ _goldbach_stats.py_ is calculating all possible sum of primes for consequtive ev
 where:
 
   * _R(n)_ is a set of all possible GPs for _n_
-  * _n_ is an even integer
+  * _n_ is an even integer > 2
 
-## Auxiliary script - symmetrical primes
+## Auxiliary script - symmetrical primes vs. GSC
 
 _goldbach-prime_gap.py_ is checking relations between GP and so called symmetrical primes. We can rewrite GSC to the following form: 
 
