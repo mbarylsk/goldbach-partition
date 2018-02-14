@@ -39,8 +39,15 @@ class GoldbachPartition:
     # object for carrying out operations on prime numbers
     primes = ""
 
+    # currently analyzed number
+    number = 0
+
     def __init__(self, p):
         self.primes = p
+        self.number = 0
+
+    def set_number (self, n):
+        self.number = n
     
     def delta_constant_plus_2 (self, iteration):
         return 2
@@ -63,6 +70,14 @@ class GoldbachPartition:
         return delta
 
     def delta_prime (self, iteration):
+        if iteration == 0:
+            delta = 0
+        else:
+            delta = self.primes.get_ith_prime(iteration + 1) - self.primes.get_ith_prime(iteration)
+        return delta
+
+    def delta_3kmin1 (self, iteration):
+        delta= self.number - self.number - 1 - 3*iteration
         if iteration == 0:
             delta = 0
         else:

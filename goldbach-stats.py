@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 - 2017, Marcin Barylski
+# Copyright (c) 2016 - 2018, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -52,7 +52,7 @@ be_verbose = False
 caching_primality_results = False
 
 min_num = 2
-max_num = 100000
+max_num = 10000
 step_factor = 2
 checkpoint_value = 1000
 big_prime_threshold = 100
@@ -101,8 +101,13 @@ min_diff_trend_factor = 0
 avg_diff_trend_factor = 0
 dict_min_primes_count = dict()
 min_prime = 0
+list_num_twin_greater = []
+list_num_twin_lesser = []
+list_num_twin_all = []
+list_num_twin_lesser_unique = []
+list_num_twin_greater_unique = []
 
-def calculate_metrics (num, factors, dp):
+def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
 
     list_nums.append(num)
@@ -158,6 +163,80 @@ def calculate_metrics (num, factors, dp):
     prev_min_diff = min_diff
     prev_avg_diff = avg_diff
 
+    number_of_twins_lesser = 0
+    number_of_twins_greater = 0
+    number_of_twins = 0
+    min_twin_lesser = 0
+    min_twin_greater = 0
+    set_twins_lesser = set()
+    set_twins_greater = set()
+    
+    for (p1, p2) in factors:
+        if p.is_lesser_twin_prime (p1):
+            set_twins_lesser.add (p1)
+            number_of_twins += 1
+        if p.is_lesser_twin_prime (p2):
+            set_twins_lesser.add (p2)
+            number_of_twins += 1
+        if p.is_greater_twin_prime (p1):
+            set_twins_greater.add (p1)
+            number_of_twins += 1
+        if p.is_greater_twin_prime (p2):
+            set_twins_greater.add (p2)
+            number_of_twins += 1
+        
+        if (p1 != p2):
+            # lesser twins
+            if p.is_lesser_twin_prime (p1):
+                number_of_twins_lesser += 1
+                if number_of_twins_lesser == 1:
+                    min_twin_lesser = p1
+                elif p1 < min_twin_lesser:
+                    min_twin_lesser = p1
+            if p.is_lesser_twin_prime (p2):
+                number_of_twins_lesser += 1
+                if number_of_twins_lesser == 1:
+                    min_twin_lesser = p2
+                elif p2 < min_twin_lesser:
+                    min_twin_lesser = p2
+            # greater twins
+            if p.is_greater_twin_prime (p1):
+                number_of_twins_greater += 1
+                if number_of_twins_greater == 1:
+                    min_twin_greater = p1
+                elif p1 < min_twin_greater:
+                    min_twin_greater = p1
+            if p.is_greater_twin_prime (p2):
+                number_of_twins_greater += 1
+                if number_of_twins_greater == 1:
+                    min_twin_greater = p2
+                elif p2 < min_twin_greater:
+                    min_twin_greater = p2
+        else:
+            # lesser twins
+            if p.is_lesser_twin_prime (p1):
+                number_of_twins_lesser += 1
+                if number_of_twins_lesser == 1:
+                    min_twin_lesser = p1
+                elif p1 < min_twin_lesser:
+                    min_twin_lesser = p1
+            # greater twins
+            if p.is_greater_twin_prime (p1):
+                number_of_twins_greater += 1
+                if number_of_twins_greater == 1:
+                    min_twin_greater = p1
+                elif p1 < min_twin_greater:
+                    min_twin_greater = p1
+
+    number_of_twins_lesser_unique = len(set_twins_lesser)
+    number_of_twins_greater_unique = len(set_twins_greater)
+
+    list_num_twin_all.append (number_of_twins)
+    list_num_twin_lesser.append (number_of_twins_lesser)
+    list_num_twin_greater.append (number_of_twins_greater)
+    list_num_twin_lesser_unique.append (number_of_twins_lesser_unique)
+    list_num_twin_greater_unique.append (number_of_twins_greater_unique)
+
 #############################################################
 # Presentation
 #############################################################
@@ -208,7 +287,7 @@ def write_auxiliary_results_to_file (directory, num, factors):
         f.write (" Minimum prime: " + str(min_prime) + "\n")
         f.close ()
 
-def read_results_from_file (file_input_oldpairs, dp):
+def read_results_from_file (file_input_oldpairs, dp, p):
     
     f = open(file_input_oldpairs, "r")
     lines = f.readlines()
@@ -219,7 +298,7 @@ def read_results_from_file (file_input_oldpairs, dp):
 
             # read factors from file and calculate metrics
             factors_from_file = dp.read_sums_from_line (line)
-            calculate_metrics (num_from_file, factors_from_file, dp)
+            calculate_metrics (num_from_file, factors_from_file, dp, p)
 
             write_auxiliary_results_to_file (directory, num_from_file, factors_from_file)         
         else:
@@ -301,7 +380,7 @@ def write_results_to_figures (directory, last_loop):
     plt.ylabel('Time [s]')
     plt.title('Duration of total calculations between checkpoints in seconds')
     plt.grid(True)
-    plt.savefig(directory + "/f_checkpoint_dutation.png")
+    plt.savefig(directory + "/f_checkpoint_duration.png")
 
     plt.figure(8)
     plt.plot(list_nums, list_min_prime, 'bo', ms=2)
@@ -329,11 +408,52 @@ def write_results_to_figures (directory, last_loop):
     plt.grid(True)
     plt.savefig(directory + "/f_min_prime_in_sum_histogram.png")
 
+    plt.figure(10)
+    plt.plot(list_nums, list_num_twin_lesser, 'bo', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Number of lesser twin primes')
+    plt.title('Number of lesser twin primes in unique Goldbach partition of n')
+    plt.grid(True)
+    plt.savefig(directory + "/f_twin_primes_lesser.png")
+
+    plt.figure(11)
+    plt.plot(list_nums, list_num_twin_greater, 'bo', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Number of greater twin primes')
+    plt.title('Number of greater twin primes in Goldbach partition of n')
+    plt.grid(True)
+    plt.savefig(directory + "/f_twin_primes_greater.png")
+
+    plt.figure(12)
+    plt.plot(list_nums, list_num_twin_all, 'bo', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Number of twin primes')
+    plt.title('Number of twin primes in Goldbach partition of n')
+    plt.grid(True)
+    plt.savefig(directory + "/f_twin_primes_all.png")
+
+    plt.figure(13)
+    plt.plot(list_nums, list_num_twin_lesser_unique, 'bo', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Number of lesser twin primes')
+    plt.title('Number of unique lesser twin primes in Goldbach partition of n')
+    plt.grid(True)
+    plt.savefig(directory + "/f_twin_primes_lesser_unique.png")
+
+    plt.figure(14)
+    plt.plot(list_nums, list_num_twin_greater_unique, 'bo', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Number of greater twin primes')
+    plt.title('Number of unique greater twin primes in Goldbach partition of n')
+    plt.grid(True)
+    plt.savefig(directory + "/f_twin_primes_greater_unique.png")
+
 #############################################################
 # Main - Phase 1
 # Preload files & restore previous calculations
 #############################################################
 
+print ("---------------------------------------------------")
 print ("Initialize objects...")
 p = primes.Primes(caching_primality_results)
 gp = goldbach.GoldbachPartition (p)
@@ -346,11 +466,13 @@ print ("DONE")
 print ("Sorting primes...")
 p.sort_prime_set()
 print ("DONE")
+print ("Output result folder: ", directory)
+print ("---------------------------------------------------")
 
 if os.path.exists(file_input_oldpairs):
     print ("Restoration of previous calculations started ...")
     
-    num_from_file = read_results_from_file (file_input_oldpairs, dp)
+    num_from_file = read_results_from_file (file_input_oldpairs, dp, p)
     min_num = int(num_from_file / step_factor)
     print ("Restoration of previous", min_num, "calculations has been completed.")
 
@@ -367,7 +489,7 @@ for k in range (min_num, max_num):
     
     factors = gp.find_sum_of_prime_numbers (num)
 
-    calculate_metrics (num, factors, dp)
+    calculate_metrics (num, factors, dp, p)
     
     # checkpoint - partial results
     if num % checkpoint_value == 0:

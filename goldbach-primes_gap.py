@@ -43,7 +43,7 @@ import dataprocessing
 #############################################################
 
 min_num = 2
-max_num = 1000000
+max_num = 500000
 
 # Checkpoint value when partial results are drawn/displayed
 checkpoint_value = 5000
@@ -75,6 +75,8 @@ file_output_gap_ratio_avg_to_goldbach = directory + "/f_checkpoint_gap_ratio_avg
 file_output_max_diff_in_sym_primes = directory + "/f_checkpoint_gap_max_diff_in_sym_primes.png"
 file_output_min_index_sym_primes = directory + "/f_checkpoint_gap_min_index_sym_primes.png"
 file_output_max_index_sym_primes = directory + "/f_checkpoint_gap_max_index_sym_primes.png"
+file_output_gap_ratio_all_to_goldbach = directory + "/f_checkpoint_gap_ratio_all_to_goldbach.png"
+file_output_gap_ratio_all_to_goldbach_2n = directory + "/f_checkpoint_gap_ratio_all_to_goldbach_2n.png"
 
 ############################################################
 # Results of calculations
@@ -87,6 +89,8 @@ list_checkpoints = []
 list_checkpoints_primes = []
 list_checkpoints_ratio = []
 list_checkpoints_ratio_avg = []
+list_checkpoints_ratio_2n = []
+list_checkpoints_ratio_avg_2n = []
 list_checkpoints_max_diff = []
 list_checkpoints_min_index = []
 list_checkpoints_max_index = []
@@ -98,7 +102,7 @@ list_checkpoints_max_index = []
 def write_results_to_figures (directory):
     # results - figures
     fig1 = plt.figure(1)
-    plt.plot(list_checkpoints, list_checkpoints_primes, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_primes, 'g.', ms=1)
     plt.xlabel('n')
     plt.ylabel('Count')
     plt.title('Number of symmetric primes')
@@ -107,7 +111,7 @@ def write_results_to_figures (directory):
     plt.close(fig1)
 
     fig2 = plt.figure(2)
-    plt.plot(list_checkpoints, list_checkpoints_ratio, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_ratio, 'g-', ms=1)
     plt.xlabel('n')
     plt.ylabel('Ratio')
     plt.title('Ratio: # of GPs / # of symmetric primes')
@@ -116,7 +120,7 @@ def write_results_to_figures (directory):
     plt.close(fig2)
 
     fig3 = plt.figure(3)
-    plt.plot(list_checkpoints, list_checkpoints_max_diff, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_max_diff, 'g.', ms=1)
     plt.xlabel('n')
     plt.ylabel('Delta')
     plt.title('Maximum difference in index in symmetric primes')
@@ -125,7 +129,7 @@ def write_results_to_figures (directory):
     plt.close(fig3)
 
     fig4 = plt.figure(4)
-    plt.plot(list_checkpoints, list_checkpoints_min_index, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_min_index, 'g.', ms=1)
     plt.xlabel('n')
     plt.ylabel('Index')
     plt.title('Minimal index in symmetric primes')
@@ -134,7 +138,7 @@ def write_results_to_figures (directory):
     plt.close(fig4)
 
     fig5 = plt.figure(5)
-    plt.plot(list_checkpoints, list_checkpoints_max_index, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_max_index, 'g.', ms=1)
     plt.xlabel('n')
     plt.ylabel('Index')
     plt.title('Maximum index in symmetric primes')
@@ -143,13 +147,39 @@ def write_results_to_figures (directory):
     plt.close(fig5)
 
     fig6 = plt.figure(6)
-    plt.plot(list_checkpoints, list_checkpoints_ratio_avg, 'g.', ms=2)
+    plt.plot(list_checkpoints, list_checkpoints_ratio_avg, 'g-', ms=1)
     plt.xlabel('n')
     plt.ylabel('Avg(Ratio)')
     plt.title('Average ratio: # of GPs / # of symmetric primes')
     plt.grid(True)
     plt.savefig(file_output_gap_ratio_avg_to_goldbach)
     plt.close(fig6)
+
+    fig7 = plt.figure(7)
+    green_patch = mpatches.Patch(color='blue', label='Average')
+    red_patch = mpatches.Patch(color='yellow', label='Current')
+    plt.legend(handles=[red_patch, green_patch])
+    plt.plot(list_checkpoints, list_checkpoints_ratio, 'y-', ms=1)
+    plt.plot(list_checkpoints, list_checkpoints_ratio_avg, 'b-', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Ratio')
+    plt.title('Current and average ratio: # of GPs for n / # of sym primes to n')
+    plt.grid(True)
+    plt.savefig(file_output_gap_ratio_all_to_goldbach)
+    plt.close(fig7)
+
+    fig8 = plt.figure(8)
+    green_patch = mpatches.Patch(color='blue', label='Average')
+    red_patch = mpatches.Patch(color='yellow', label='Current')
+    plt.legend(handles=[red_patch, green_patch])
+    plt.plot(list_checkpoints, list_checkpoints_ratio_2n, 'y-', ms=1)
+    plt.plot(list_checkpoints, list_checkpoints_ratio_avg_2n, 'b-', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Ratio')
+    plt.title('Current and average ratio: # GP of for 2n / # of sym primes to n')
+    plt.grid(True)
+    plt.savefig(file_output_gap_ratio_all_to_goldbach_2n)
+    plt.close(fig8)
 
 #############################################################
 # Main
@@ -195,10 +225,20 @@ for num in range (min_num, max_num):
     list_checkpoints_min_index.append (min_index)
     list_checkpoints_max_index.append (max_index)
 
-    factors = gp.find_sum_of_prime_numbers (2 * num)
-    list_checkpoints_ratio.append (dp.get_number_of_pairs (factors) / count)
+    factors = gp.find_sum_of_prime_numbers (num)
+    factors_2n = gp.find_sum_of_prime_numbers (2*num)
+
+    # ratio GP(n) / # of symmetric primes
+    ratio = dp.get_number_of_pairs (factors) / count
+    list_checkpoints_ratio.append (ratio)
     avg_ratio = dp.get_avg_value_from_list (list_checkpoints_ratio)
     list_checkpoints_ratio_avg.append (avg_ratio)
+
+    # ratio GP(2n) / # of symmetric primes
+    ratio_2n = dp.get_number_of_pairs (factors_2n) / count
+    list_checkpoints_ratio_2n.append (ratio_2n)
+    avg_ratio_2n = dp.get_avg_value_from_list (list_checkpoints_ratio_2n)
+    list_checkpoints_ratio_avg_2n.append (avg_ratio_2n)
 
     if count == 0:
         print ("WARNING: For n=", n, "no symmetric primes found")
@@ -209,7 +249,10 @@ for num in range (min_num, max_num):
         dt_diff_current = (dt_current - dt_current_previous).total_seconds()
         perc_completed = str(int(num * 100 / max_num))
         print ("Checkpoint", num, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
-        print (" Average ratio:", avg_ratio)
+        print (" Current ratio (n)  :", ratio)
+        print (" Current ratio (2n) :", ratio_2n)
+        print (" Average ratio (n)  :", avg_ratio)
+        print (" Average ratio (2n) :", avg_ratio_2n)
 
 dt_end = datetime.now()
 

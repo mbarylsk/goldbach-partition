@@ -24,6 +24,8 @@
 # OF SUCH DAMAGE.
 # 
 
+import sys
+import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -36,8 +38,9 @@ import primes
 #############################################################
 
 min_prime_index = 1
-max_prime_index = 100000
-checkpoint_value = 500
+max_prime_index = 1000000
+max_num = max_prime_index - min_prime_index
+checkpoint_value = 5000
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -56,6 +59,18 @@ method = 2
 #   o file_input_nonprimes - contains composite numbers
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
 file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
+
+#############################################################
+# Settings - output directory and files
+#############################################################
+
+directory = "results/" + str(max_num)
+if not os.path.exists(directory):
+    os.makedirs(directory)
+file_output_fig1 = directory + "/f_sumbuild_effectiveness.png"
+file_output_fig2 = directory + "/f_sumbuild_spare_and_to_be_verified.png"
+file_output_fig3 = directory + "/f_sumbuild_diff.png"
+file_output_pickle = directory + "/objs_sym_primes.pickle"
 
 #############################################################
 # Results of calculations
@@ -169,7 +184,6 @@ def print_stats_2 (i):
     plt.ylabel('number')
     plt.title('Min number where all numbers below are verified from GP standpoint')
     plt.grid(True)
-    file_output_fig1 = "results/fig1_effectiveness.png"
     plt.savefig(file_output_fig1)
     plt.close(fig1)
 
@@ -186,7 +200,6 @@ def print_stats_2 (i):
     plt.ylabel('number of elements')
     plt.title('Spare verified numbers and numbers to be verified')
     plt.grid(True)
-    file_output_fig2 = "results/fig2_spare_and_to_be_verified.png"
     plt.savefig(file_output_fig2)
     plt.close(fig2)
 
@@ -203,7 +216,6 @@ def print_stats_2 (i):
     plt.ylabel('difference')
     plt.title('Difference between actual and theoretical minimum')
     plt.grid(True)
-    file_output_fig3 = "results/fig3_diff.png"
     plt.savefig(file_output_fig3)
     plt.close(fig3)
 
@@ -227,7 +239,6 @@ dt_start = datetime.now()
 dt_current_previous = dt_start
 
 k = 0
-max_num = max_prime_index - min_prime_index
 diff_previous = 0
 iterations = 0
 
