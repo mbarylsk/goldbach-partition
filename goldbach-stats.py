@@ -82,7 +82,7 @@ file_output_big_smallest_primes_below = directory + "/t_big_smallest_primes_belo
 list_min_sats = []
 list_max_sats = []
 list_avg_sats = []
-list_num_unique_pairs = []
+list_num_distinct_pairs = []
 list_max_diff_in_pairs = []
 list_min_diff_in_pairs = []
 list_avg_diff_in_pairs = []
@@ -104,8 +104,9 @@ min_prime = 0
 list_num_twin_greater = []
 list_num_twin_lesser = []
 list_num_twin_all = []
-list_num_twin_lesser_unique = []
-list_num_twin_greater_unique = []
+list_num_twin_lesser_distinct = []
+list_num_twin_greater_distinct = []
+list_num_ratio_twin_gp = []
 
 def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
@@ -136,7 +137,7 @@ def calculate_metrics (num, factors, dp, p):
     list_avg_sats.append(avg_sat)
     list_min_sats.append(min_sat)
     list_min_prime.append(min_prime)
-    list_num_unique_pairs.append(num_of_pairs)
+    list_num_distinct_pairs.append(num_of_pairs)
     list_max_diff_in_pairs.append(max_diff)
     list_min_diff_in_pairs.append(min_diff)
     list_avg_diff_in_pairs.append(avg_diff)
@@ -173,16 +174,20 @@ def calculate_metrics (num, factors, dp, p):
     
     for (p1, p2) in factors:
         if p.is_lesser_twin_prime (p1):
-            set_twins_lesser.add (p1)
+            if p1 not in set_twins_lesser:
+                set_twins_lesser.add (p1)
             number_of_twins += 1
         if p.is_lesser_twin_prime (p2):
-            set_twins_lesser.add (p2)
+            if p2 not in set_twins_lesser:
+                set_twins_lesser.add (p2)
             number_of_twins += 1
         if p.is_greater_twin_prime (p1):
-            set_twins_greater.add (p1)
+            if p1 not in set_twins_greater:
+                set_twins_greater.add (p1)
             number_of_twins += 1
         if p.is_greater_twin_prime (p2):
-            set_twins_greater.add (p2)
+            if p2 not in set_twins_greater:
+                set_twins_greater.add (p2)
             number_of_twins += 1
         
         if (p1 != p2):
@@ -228,14 +233,16 @@ def calculate_metrics (num, factors, dp, p):
                 elif p1 < min_twin_greater:
                     min_twin_greater = p1
 
-    number_of_twins_lesser_unique = len(set_twins_lesser)
-    number_of_twins_greater_unique = len(set_twins_greater)
+    number_of_twins_lesser_distinct = len(set_twins_lesser)
+    number_of_twins_greater_distinct = len(set_twins_greater)
 
     list_num_twin_all.append (number_of_twins)
     list_num_twin_lesser.append (number_of_twins_lesser)
     list_num_twin_greater.append (number_of_twins_greater)
-    list_num_twin_lesser_unique.append (number_of_twins_lesser_unique)
-    list_num_twin_greater_unique.append (number_of_twins_greater_unique)
+    list_num_twin_lesser_distinct.append (number_of_twins_lesser_distinct)
+    list_num_twin_greater_distinct.append (number_of_twins_greater_distinct)
+
+    list_num_ratio_twin_gp.append(number_of_twins/(num_of_pairs*2))
 
 #############################################################
 # Presentation
@@ -329,7 +336,7 @@ def write_results_to_figures (directory, last_loop):
     plt.savefig(directory + "/f_saturation.png")
 
     plt.figure(2)
-    plt.plot(list_nums, list_num_unique_pairs, 'bo', ms=2)
+    plt.plot(list_nums, list_num_distinct_pairs, 'bo', ms=2)
     plt.xlabel('Number')
     plt.ylabel('Number of Goldbach partitions for a given number')
     plt.title('Number of Goldbach partitions')
@@ -412,7 +419,7 @@ def write_results_to_figures (directory, last_loop):
     plt.plot(list_nums, list_num_twin_lesser, 'bo', ms=1)
     plt.xlabel('n')
     plt.ylabel('Number of lesser twin primes')
-    plt.title('Number of lesser twin primes in unique Goldbach partition of n')
+    plt.title('Number of lesser twin primes in distinct Goldbach partition of n')
     plt.grid(True)
     plt.savefig(directory + "/f_twin_primes_lesser.png")
 
@@ -433,20 +440,38 @@ def write_results_to_figures (directory, last_loop):
     plt.savefig(directory + "/f_twin_primes_all.png")
 
     plt.figure(13)
-    plt.plot(list_nums, list_num_twin_lesser_unique, 'bo', ms=1)
+    plt.plot(list_nums, list_num_twin_lesser_distinct, 'bo', ms=1)
     plt.xlabel('n')
     plt.ylabel('Number of lesser twin primes')
-    plt.title('Number of unique lesser twin primes in Goldbach partition of n')
+    plt.title('Number of distinct lesser twin primes in Goldbach partition of n')
     plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_lesser_unique.png")
+    plt.savefig(directory + "/f_twin_primes_lesser_distinct.png")
 
     plt.figure(14)
-    plt.plot(list_nums, list_num_twin_greater_unique, 'bo', ms=1)
+    plt.plot(list_nums, list_num_twin_greater_distinct, 'bo', ms=1)
     plt.xlabel('n')
     plt.ylabel('Number of greater twin primes')
-    plt.title('Number of unique greater twin primes in Goldbach partition of n')
+    plt.title('Number of distinct greater twin primes in Goldbach partition of n')
     plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_greater_unique.png")
+    plt.savefig(directory + "/f_twin_primes_greater_distinct.png")
+
+    fig = plt.figure(15)
+    ax1 = fig.add_subplot(111)
+    ax1.bar(list_nums, list_num_twin_greater_distinct, color='blue', edgecolor='blue', bottom=list_num_twin_greater_distinct)
+    ax1.bar(list_nums, list_num_twin_lesser_distinct, color='red', edgecolor='red')
+    plt.xlabel('n')
+    plt.ylabel('Number of primes')
+    plt.title('Number of distinct twin primes in Goldbach partition of n')
+    plt.grid(True)
+    plt.savefig(directory + "/f_twin_primes_lesser_greater_distinct.png")
+
+    plt.figure(16)
+    plt.plot(list_nums, list_num_ratio_twin_gp, 'bo', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Ratio')
+    plt.title('Ratio: # of twin primes / # of primes in Goldbach partions')
+    plt.grid(True)
+    plt.savefig(directory + "/f_ratio_twin_primes_to_all_primes.png")
 
 #############################################################
 # Main - Phase 1
