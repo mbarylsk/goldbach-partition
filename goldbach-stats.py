@@ -51,6 +51,11 @@ be_verbose = False
 #   o False - do not cache new primality test results
 caching_primality_results = False
 
+# Check basic stats
+check_regular = False
+# Check stats related to twin primes
+check_twins = True
+
 min_num = 2
 max_num = 10000
 step_factor = 2
@@ -106,143 +111,168 @@ list_num_twin_lesser = []
 list_num_twin_all = []
 list_num_twin_lesser_distinct = []
 list_num_twin_greater_distinct = []
+list_num_diff_twin_greater_lesser_distinct = []
+list_num_diff_twin_greater_lesser_distinct_avg = []
 list_num_ratio_twin_gp = []
+list_num_ratio_twin_gp_avg = []
+list_zero_twin_lesser = []
+list_zero_twin_greater = []
+counter_zero_twin_lesser = 0
+counter_zero_twin_greater = 0
+list_zero_twin_lesser_count = []
+list_zero_twin_greater_count = []
 
 def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
+    global counter_zero_twin_lesser, counter_zero_twin_greater
 
     list_nums.append(num)
-    
-    min_prime = dp.get_min_factor (factors)
-    if min_prime not in dict_min_primes_count:
-        dict_min_primes_count[min_prime] = 1
-    else:
-        counter = dict_min_primes_count[min_prime]
-        counter = counter + 1
-        dict_min_primes_count[min_prime] = counter
-    
-    diffs_in_factors = dp.get_diff_in_factors (factors)
-    
-    min_diff = dp.get_min_value_from_list (diffs_in_factors)
-    max_diff = dp.get_max_value_from_list (diffs_in_factors)
-    avg_diff = dp.get_avg_value_from_list (diffs_in_factors)
-
-    max_sat = dp.get_perc_max_saturation_from_factors (num, factors)
-    min_sat = dp.get_perc_min_saturation_from_factors (num, factors)
-    avg_sat = dp.get_perc_avg_saturation_from_factors (num, factors)
-    
     num_of_pairs = dp.get_number_of_pairs (factors)
-    
-    list_max_sats.append(max_sat)
-    list_avg_sats.append(avg_sat)
-    list_min_sats.append(min_sat)
-    list_min_prime.append(min_prime)
-    list_num_distinct_pairs.append(num_of_pairs)
-    list_max_diff_in_pairs.append(max_diff)
-    list_min_diff_in_pairs.append(min_diff)
-    list_avg_diff_in_pairs.append(avg_diff)
 
-    if prev_max_diff > max_diff:
-        max_diff_trend_factor = max_diff_trend_factor - 1
-    elif prev_max_diff < max_diff:
-        max_diff_trend_factor = max_diff_trend_factor + 1
-    list_max_diff_in_pairs_trend.append(max_diff_trend_factor)
-
-    if prev_min_diff > min_diff:
-        min_diff_trend_factor = min_diff_trend_factor - 1
-    elif prev_max_diff < min_diff:
-        min_diff_trend_factor = min_diff_trend_factor + 1
-    list_min_diff_in_pairs_trend.append(min_diff_trend_factor)
-
-    if prev_avg_diff > avg_diff:
-        avg_diff_trend_factor = avg_diff_trend_factor - 1
-    elif prev_max_diff < avg_diff:
-        avg_diff_trend_factor = avg_diff_trend_factor + 1
-    list_avg_diff_in_pairs_trend.append(avg_diff_trend_factor)
-
-    prev_max_diff = max_diff
-    prev_min_diff = min_diff
-    prev_avg_diff = avg_diff
-
-    number_of_twins_lesser = 0
-    number_of_twins_greater = 0
-    number_of_twins = 0
-    min_twin_lesser = 0
-    min_twin_greater = 0
-    set_twins_lesser = set()
-    set_twins_greater = set()
-    
-    for (p1, p2) in factors:
-        if p.is_lesser_twin_prime (p1):
-            if p1 not in set_twins_lesser:
-                set_twins_lesser.add (p1)
-            number_of_twins += 1
-        if p.is_lesser_twin_prime (p2):
-            if p2 not in set_twins_lesser:
-                set_twins_lesser.add (p2)
-            number_of_twins += 1
-        if p.is_greater_twin_prime (p1):
-            if p1 not in set_twins_greater:
-                set_twins_greater.add (p1)
-            number_of_twins += 1
-        if p.is_greater_twin_prime (p2):
-            if p2 not in set_twins_greater:
-                set_twins_greater.add (p2)
-            number_of_twins += 1
-        
-        if (p1 != p2):
-            # lesser twins
-            if p.is_lesser_twin_prime (p1):
-                number_of_twins_lesser += 1
-                if number_of_twins_lesser == 1:
-                    min_twin_lesser = p1
-                elif p1 < min_twin_lesser:
-                    min_twin_lesser = p1
-            if p.is_lesser_twin_prime (p2):
-                number_of_twins_lesser += 1
-                if number_of_twins_lesser == 1:
-                    min_twin_lesser = p2
-                elif p2 < min_twin_lesser:
-                    min_twin_lesser = p2
-            # greater twins
-            if p.is_greater_twin_prime (p1):
-                number_of_twins_greater += 1
-                if number_of_twins_greater == 1:
-                    min_twin_greater = p1
-                elif p1 < min_twin_greater:
-                    min_twin_greater = p1
-            if p.is_greater_twin_prime (p2):
-                number_of_twins_greater += 1
-                if number_of_twins_greater == 1:
-                    min_twin_greater = p2
-                elif p2 < min_twin_greater:
-                    min_twin_greater = p2
+    if check_regular:
+        min_prime = dp.get_min_factor (factors)
+        if min_prime not in dict_min_primes_count:
+            dict_min_primes_count[min_prime] = 1
         else:
-            # lesser twins
+            counter = dict_min_primes_count[min_prime]
+            counter = counter + 1
+            dict_min_primes_count[min_prime] = counter
+        
+        diffs_in_factors = dp.get_diff_in_factors (factors)
+        
+        min_diff = dp.get_min_value_from_list (diffs_in_factors)
+        max_diff = dp.get_max_value_from_list (diffs_in_factors)
+        avg_diff = dp.get_avg_value_from_list (diffs_in_factors)
+
+        max_sat = dp.get_perc_max_saturation_from_factors (num, factors)
+        min_sat = dp.get_perc_min_saturation_from_factors (num, factors)
+        avg_sat = dp.get_perc_avg_saturation_from_factors (num, factors)
+        
+        list_max_sats.append(max_sat)
+        list_avg_sats.append(avg_sat)
+        list_min_sats.append(min_sat)
+        list_min_prime.append(min_prime)
+        list_num_distinct_pairs.append(num_of_pairs)
+        list_max_diff_in_pairs.append(max_diff)
+        list_min_diff_in_pairs.append(min_diff)
+        list_avg_diff_in_pairs.append(avg_diff)
+
+        if prev_max_diff > max_diff:
+            max_diff_trend_factor = max_diff_trend_factor - 1
+        elif prev_max_diff < max_diff:
+            max_diff_trend_factor = max_diff_trend_factor + 1
+        list_max_diff_in_pairs_trend.append(max_diff_trend_factor)
+
+        if prev_min_diff > min_diff:
+            min_diff_trend_factor = min_diff_trend_factor - 1
+        elif prev_max_diff < min_diff:
+            min_diff_trend_factor = min_diff_trend_factor + 1
+        list_min_diff_in_pairs_trend.append(min_diff_trend_factor)
+
+        if prev_avg_diff > avg_diff:
+            avg_diff_trend_factor = avg_diff_trend_factor - 1
+        elif prev_max_diff < avg_diff:
+            avg_diff_trend_factor = avg_diff_trend_factor + 1
+        list_avg_diff_in_pairs_trend.append(avg_diff_trend_factor)
+
+        prev_max_diff = max_diff
+        prev_min_diff = min_diff
+        prev_avg_diff = avg_diff
+
+    if check_twins:
+        number_of_twins_lesser = 0
+        number_of_twins_greater = 0
+        number_of_twins = 0
+        min_twin_lesser = 0
+        min_twin_greater = 0
+        set_twins_lesser = set()
+        set_twins_greater = set()
+
+        for (p1, p2) in factors:
+        
             if p.is_lesser_twin_prime (p1):
-                number_of_twins_lesser += 1
-                if number_of_twins_lesser == 1:
-                    min_twin_lesser = p1
-                elif p1 < min_twin_lesser:
-                    min_twin_lesser = p1
-            # greater twins
+                if p1 not in set_twins_lesser:
+                    set_twins_lesser.add (p1)
+                number_of_twins += 1
+            if p.is_lesser_twin_prime (p2):
+                if p2 not in set_twins_lesser:
+                    set_twins_lesser.add (p2)
+                number_of_twins += 1
             if p.is_greater_twin_prime (p1):
-                number_of_twins_greater += 1
-                if number_of_twins_greater == 1:
-                    min_twin_greater = p1
-                elif p1 < min_twin_greater:
-                    min_twin_greater = p1
+                if p1 not in set_twins_greater:
+                    set_twins_greater.add (p1)
+                number_of_twins += 1
+            if p.is_greater_twin_prime (p2):
+                if p2 not in set_twins_greater:
+                    set_twins_greater.add (p2)
+                number_of_twins += 1
+            
+            if (p1 != p2):
+                # lesser twins
+                if p.is_lesser_twin_prime (p1):
+                    number_of_twins_lesser += 1
+                    if number_of_twins_lesser == 1:
+                        min_twin_lesser = p1
+                    elif p1 < min_twin_lesser:
+                        min_twin_lesser = p1
+                if p.is_lesser_twin_prime (p2):
+                    number_of_twins_lesser += 1
+                    if number_of_twins_lesser == 1:
+                        min_twin_lesser = p2
+                    elif p2 < min_twin_lesser:
+                        min_twin_lesser = p2
+                # greater twins
+                if p.is_greater_twin_prime (p1):
+                    number_of_twins_greater += 1
+                    if number_of_twins_greater == 1:
+                        min_twin_greater = p1
+                    elif p1 < min_twin_greater:
+                        min_twin_greater = p1
+                if p.is_greater_twin_prime (p2):
+                    number_of_twins_greater += 1
+                    if number_of_twins_greater == 1:
+                        min_twin_greater = p2
+                    elif p2 < min_twin_greater:
+                        min_twin_greater = p2
+            else:
+                # lesser twins
+                if p.is_lesser_twin_prime (p1):
+                    number_of_twins_lesser += 1
+                    if number_of_twins_lesser == 1:
+                        min_twin_lesser = p1
+                    elif p1 < min_twin_lesser:
+                        min_twin_lesser = p1
+                # greater twins
+                if p.is_greater_twin_prime (p1):
+                    number_of_twins_greater += 1
+                    if number_of_twins_greater == 1:
+                        min_twin_greater = p1
+                    elif p1 < min_twin_greater:
+                        min_twin_greater = p1
 
-    number_of_twins_lesser_distinct = len(set_twins_lesser)
-    number_of_twins_greater_distinct = len(set_twins_greater)
+        number_of_twins_lesser_distinct = len(set_twins_lesser)
+        number_of_twins_greater_distinct = len(set_twins_greater)
 
-    list_num_twin_all.append (number_of_twins)
-    list_num_twin_lesser.append (number_of_twins_lesser)
-    list_num_twin_greater.append (number_of_twins_greater)
-    list_num_twin_lesser_distinct.append (number_of_twins_lesser_distinct)
-    list_num_twin_greater_distinct.append (number_of_twins_greater_distinct)
+        list_num_twin_all.append (number_of_twins)
+        list_num_twin_lesser.append (number_of_twins_lesser)
+        list_num_twin_greater.append (number_of_twins_greater)
+        list_num_twin_lesser_distinct.append (number_of_twins_lesser_distinct)
+        list_num_twin_greater_distinct.append (number_of_twins_greater_distinct)
 
-    list_num_ratio_twin_gp.append(number_of_twins/(num_of_pairs*2))
+        list_num_diff_twin_greater_lesser_distinct.append (number_of_twins_greater_distinct-number_of_twins_lesser_distinct)
+        list_num_diff_twin_greater_lesser_distinct_avg.append (dp.get_avg_value_from_list (list_num_diff_twin_greater_lesser_distinct))
+
+        list_num_ratio_twin_gp.append(number_of_twins/(num_of_pairs*2))
+        list_num_ratio_twin_gp_avg.append(dp.get_avg_value_from_list (list_num_ratio_twin_gp))
+        
+        if number_of_twins_lesser_distinct == 0:
+            list_zero_twin_lesser.append(num)
+            counter_zero_twin_lesser += 1
+            list_zero_twin_lesser_count.append(counter_zero_twin_lesser)
+        if number_of_twins_greater_distinct == 0:
+            list_zero_twin_greater.append(num)
+            counter_zero_twin_greater += 1
+            list_zero_twin_greater_count.append(counter_zero_twin_greater)
 
 #############################################################
 # Presentation
@@ -321,157 +351,205 @@ def read_results_from_file (file_input_oldpairs, dp, p):
 
 def write_results_to_figures (directory, last_loop):
     # results - figures
-    plt.figure(1)
-    plt.plot(list_nums, list_max_sats, 'b.', ms=2)
-    plt.plot(list_nums, list_min_sats, 'r.', ms=2)
-    plt.plot(list_nums, list_avg_sats, 'g.', ms=2)
-    blue_patch = mpatches.Patch(color='blue', label='max(p1, p2)/number*100%')
-    red_patch = mpatches.Patch(color='red', label='min(p1, p2)/number*100%')
-    green_patch = mpatches.Patch(color='green', label='avg(p1, p2)/number*100%')
-    plt.legend(handles=[red_patch, blue_patch, green_patch], loc='upper right', bbox_to_anchor=(0.8, 0.8))
-    plt.xlabel('Number')
-    plt.ylabel('Percentage of number')
-    plt.title('Participation of max/min/avg prime from Goldbach partition in number')
-    plt.grid(True)
-    plt.savefig(directory + "/f_saturation.png")
 
-    plt.figure(2)
-    plt.plot(list_nums, list_num_distinct_pairs, 'bo', ms=2)
-    plt.xlabel('Number')
-    plt.ylabel('Number of Goldbach partitions for a given number')
-    plt.title('Number of Goldbach partitions')
-    plt.grid(True)
-    plt.savefig(directory + "/f_pairs.png")
+    if check_regular:
+        plt.figure(1)
+        plt.plot(list_nums, list_max_sats, 'b.', ms=2)
+        plt.plot(list_nums, list_min_sats, 'r.', ms=2)
+        plt.plot(list_nums, list_avg_sats, 'g.', ms=2)
+        blue_patch = mpatches.Patch(color='blue', label='max(p1, p2)/number*100%')
+        red_patch = mpatches.Patch(color='red', label='min(p1, p2)/number*100%')
+        green_patch = mpatches.Patch(color='green', label='avg(p1, p2)/number*100%')
+        plt.legend(handles=[red_patch, blue_patch, green_patch], loc='upper right', bbox_to_anchor=(0.8, 0.8))
+        plt.xlabel('Number')
+        plt.ylabel('Percentage of number')
+        plt.title('Participation of max/min/avg prime from Goldbach partition in number')
+        plt.grid(True)
+        plt.savefig(directory + "/f_saturation.png")
 
-    plt.figure(3)
-    plt.plot(list_nums, list_max_diff_in_pairs, 'bo', ms=2)
-    plt.xlabel('Number')
-    plt.ylabel('Maximum difference in Goldbach partition')
-    plt.title('Maximum difference in Goldbach partition for a given number')
-    plt.grid(True)
-    plt.savefig(directory + "/f_max_diff_pairs.png")
+        plt.figure(2)
+        plt.plot(list_nums, list_num_distinct_pairs, 'bo', ms=2)
+        plt.xlabel('Number')
+        plt.ylabel('Number of Goldbach partitions for a given number')
+        plt.title('Number of Goldbach partitions')
+        plt.grid(True)
+        plt.savefig(directory + "/f_pairs.png")
 
-    plt.figure(4)
-    plt.plot(list_nums, list_min_diff_in_pairs, 'bo', ms=2)
-    plt.xlabel('Number')
-    plt.ylabel('Minimum difference in Goldbach partition')
-    plt.title('Minimum difference in Goldbach partition for a given number')
-    plt.grid(True)
-    plt.savefig(directory + "/f_min_diff_pairs.png")
+        plt.figure(3)
+        plt.plot(list_nums, list_max_diff_in_pairs, 'bo', ms=2)
+        plt.xlabel('Number')
+        plt.ylabel('Maximum difference in Goldbach partition')
+        plt.title('Maximum difference in Goldbach partition for a given number')
+        plt.grid(True)
+        plt.savefig(directory + "/f_max_diff_pairs.png")
 
-    plt.figure(5)
-    plt.plot(list_nums, list_avg_diff_in_pairs, 'bo', ms=2)
-    plt.xlabel('Number')
-    plt.ylabel('Average difference in Goldbach partition')
-    plt.title('Average difference in Goldbach partition for a given number')
-    plt.grid(True)
-    plt.savefig(directory + "/f_avg_diff_pairs.png")
+        plt.figure(4)
+        plt.plot(list_nums, list_min_diff_in_pairs, 'bo', ms=2)
+        plt.xlabel('Number')
+        plt.ylabel('Minimum difference in Goldbach partition')
+        plt.title('Minimum difference in Goldbach partition for a given number')
+        plt.grid(True)
+        plt.savefig(directory + "/f_min_diff_pairs.png")
 
-    plt.figure(6)
-    plt.plot(list_nums, list_max_diff_in_pairs_trend, 'b.', ms=1, label='Trend in max diff')
-    plt.plot(list_nums, list_min_diff_in_pairs_trend, 'r.', ms=1, label='Trend in min diff')
-    plt.plot(list_nums, list_avg_diff_in_pairs_trend, 'g.', ms=1, label='Trend in avg diff')
-    blue_patch = mpatches.Patch(color='blue', label='Trend in max diff')
-    red_patch = mpatches.Patch(color='red', label='Trend in min diff')
-    green_patch = mpatches.Patch(color='green', label='Trend in avg diff')
-    plt.legend(handles=[red_patch, blue_patch, green_patch])
-    plt.xlabel('Number')
-    plt.ylabel('Change in trend')
-    plt.title('Trends in Goldbach partition')
-    plt.grid(True)
-    plt.savefig(directory + "/f_max_diff_pairs_trend.png")
+        plt.figure(5)
+        plt.plot(list_nums, list_avg_diff_in_pairs, 'bo', ms=2)
+        plt.xlabel('Number')
+        plt.ylabel('Average difference in Goldbach partition')
+        plt.title('Average difference in Goldbach partition for a given number')
+        plt.grid(True)
+        plt.savefig(directory + "/f_avg_diff_pairs.png")
 
-    plt.figure(7)
-    plt.plot(list_checkpoints, list_checkpoints_duration)
-    plt.xlabel('Checkpoint [iteration]')
-    plt.ylabel('Time [s]')
-    plt.title('Duration of total calculations between checkpoints in seconds')
-    plt.grid(True)
-    plt.savefig(directory + "/f_checkpoint_duration.png")
+        plt.figure(6)
+        plt.plot(list_nums, list_max_diff_in_pairs_trend, 'b.', ms=1, label='Trend in max diff')
+        plt.plot(list_nums, list_min_diff_in_pairs_trend, 'r.', ms=1, label='Trend in min diff')
+        plt.plot(list_nums, list_avg_diff_in_pairs_trend, 'g.', ms=1, label='Trend in avg diff')
+        blue_patch = mpatches.Patch(color='blue', label='Trend in max diff')
+        red_patch = mpatches.Patch(color='red', label='Trend in min diff')
+        green_patch = mpatches.Patch(color='green', label='Trend in avg diff')
+        plt.legend(handles=[red_patch, blue_patch, green_patch])
+        plt.xlabel('Number')
+        plt.ylabel('Change in trend')
+        plt.title('Trends in Goldbach partition')
+        plt.grid(True)
+        plt.savefig(directory + "/f_max_diff_pairs_trend.png")
 
-    plt.figure(8)
-    plt.plot(list_nums, list_min_prime, 'bo', ms=2)
-    plt.xlabel('Number')
-    plt.ylabel('Minimum prime number in Goldbach partition')
-    plt.title('Minimum prime number in Goldbach partition for a given number')
-    plt.grid(True)
-    plt.savefig(directory + "/f_min_prime_in_sum.png")
+        plt.figure(7)
+        plt.plot(list_checkpoints, list_checkpoints_duration)
+        plt.xlabel('Checkpoint [iteration]')
+        plt.ylabel('Time [s]')
+        plt.title('Duration of total calculations between checkpoints in seconds')
+        plt.grid(True)
+        plt.savefig(directory + "/f_checkpoint_duration.png")
 
-    plt.figure(9)
-    list_primes = []
-    list_primes_count = []
-    for key in sorted(dict_min_primes_count.keys()):
-        ikey = int(key)
-        ivalue = int(dict_min_primes_count[key])
-        list_primes.append(ikey)
-        list_primes_count.append(ivalue)
-        if last_loop:
-            if ivalue > min_prime_count_threshold:
-                plt.annotate(str(ikey)+":"+str(ivalue), xy=(ikey,ivalue), xytext=(5,5), textcoords='offset points')
-    plt.plot(list_primes, list_primes_count, 'bo-', ms=3)
-    plt.xlabel('Prime number')
-    plt.ylabel('Apperances')
-    plt.title('Frequency of minimum primes in Goldbach partition')
-    plt.grid(True)
-    plt.savefig(directory + "/f_min_prime_in_sum_histogram.png")
+        plt.figure(8)
+        plt.plot(list_nums, list_min_prime, 'bo', ms=2)
+        plt.xlabel('Number')
+        plt.ylabel('Minimum prime number in Goldbach partition')
+        plt.title('Minimum prime number in Goldbach partition for a given number')
+        plt.grid(True)
+        plt.savefig(directory + "/f_min_prime_in_sum.png")
 
-    plt.figure(10)
-    plt.plot(list_nums, list_num_twin_lesser, 'bo', ms=1)
-    plt.xlabel('n')
-    plt.ylabel('Number of lesser twin primes')
-    plt.title('Number of lesser twin primes in distinct Goldbach partition of n')
-    plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_lesser.png")
+        plt.figure(9)
+        list_primes = []
+        list_primes_count = []
+        for key in sorted(dict_min_primes_count.keys()):
+            ikey = int(key)
+            ivalue = int(dict_min_primes_count[key])
+            list_primes.append(ikey)
+            list_primes_count.append(ivalue)
+            if last_loop:
+                if ivalue > min_prime_count_threshold:
+                    plt.annotate(str(ikey)+":"+str(ivalue), xy=(ikey,ivalue), xytext=(5,5), textcoords='offset points')
+        plt.plot(list_primes, list_primes_count, 'bo-', ms=3)
+        plt.xlabel('Prime number')
+        plt.ylabel('Apperances')
+        plt.title('Frequency of minimum primes in Goldbach partition')
+        plt.grid(True)
+        plt.savefig(directory + "/f_min_prime_in_sum_histogram.png")
 
-    plt.figure(11)
-    plt.plot(list_nums, list_num_twin_greater, 'bo', ms=1)
-    plt.xlabel('n')
-    plt.ylabel('Number of greater twin primes')
-    plt.title('Number of greater twin primes in Goldbach partition of n')
-    plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_greater.png")
+    if check_twins:
+        plt.figure(10)
+        plt.plot(list_nums, list_num_twin_lesser, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Number of lesser twin primes')
+        plt.title('Number of lesser twin primes in distinct Goldbach partition of n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_twin_primes_lesser.png")
 
-    plt.figure(12)
-    plt.plot(list_nums, list_num_twin_all, 'bo', ms=1)
-    plt.xlabel('n')
-    plt.ylabel('Number of twin primes')
-    plt.title('Number of twin primes in Goldbach partition of n')
-    plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_all.png")
+        plt.figure(11)
+        plt.plot(list_nums, list_num_twin_greater, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Number of greater twin primes')
+        plt.title('Number of greater twin primes in Goldbach partition of n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_twin_primes_greater.png")
 
-    plt.figure(13)
-    plt.plot(list_nums, list_num_twin_lesser_distinct, 'bo', ms=1)
-    plt.xlabel('n')
-    plt.ylabel('Number of lesser twin primes')
-    plt.title('Number of distinct lesser twin primes in Goldbach partition of n')
-    plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_lesser_distinct.png")
+        plt.figure(12)
+        plt.plot(list_nums, list_num_twin_all, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Number of twin primes')
+        plt.title('Number of twin primes in Goldbach partition of n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_twin_primes_all.png")
 
-    plt.figure(14)
-    plt.plot(list_nums, list_num_twin_greater_distinct, 'bo', ms=1)
-    plt.xlabel('n')
-    plt.ylabel('Number of greater twin primes')
-    plt.title('Number of distinct greater twin primes in Goldbach partition of n')
-    plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_greater_distinct.png")
+        plt.figure(13)
+        plt.plot(list_nums, list_num_twin_lesser_distinct, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Number of lesser twin primes')
+        plt.title('Number of distinct lesser twin primes in Goldbach partition of n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_twin_primes_lesser_distinct.png")
 
-    fig = plt.figure(15)
-    ax1 = fig.add_subplot(111)
-    ax1.bar(list_nums, list_num_twin_greater_distinct, color='blue', edgecolor='blue', bottom=list_num_twin_greater_distinct)
-    ax1.bar(list_nums, list_num_twin_lesser_distinct, color='red', edgecolor='red')
-    plt.xlabel('n')
-    plt.ylabel('Number of primes')
-    plt.title('Number of distinct twin primes in Goldbach partition of n')
-    plt.grid(True)
-    plt.savefig(directory + "/f_twin_primes_lesser_greater_distinct.png")
+        plt.figure(14)
+        plt.plot(list_nums, list_num_twin_greater_distinct, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Number of greater twin primes')
+        plt.title('Number of distinct greater twin primes in Goldbach partition of n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_twin_primes_greater_distinct.png")
 
-    plt.figure(16)
-    plt.plot(list_nums, list_num_ratio_twin_gp, 'bo', ms=1)
-    plt.xlabel('n')
-    plt.ylabel('Ratio')
-    plt.title('Ratio: # of twin primes / # of primes in Goldbach partions')
-    plt.grid(True)
-    plt.savefig(directory + "/f_ratio_twin_primes_to_all_primes.png")
+        fig = plt.figure(15)
+        ax1 = fig.add_subplot(111)
+        ax1.bar(list_nums, list_num_twin_greater_distinct, color='blue', edgecolor='blue', bottom=list_num_twin_greater_distinct)
+        ax1.bar(list_nums, list_num_twin_lesser_distinct, color='red', edgecolor='red')
+        plt.xlabel('n')
+        plt.ylabel('Number of primes')
+        plt.title('Number of distinct twin primes in Goldbach partition of n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_twin_primes_lesser_greater_distinct.png")
+
+        plt.figure(16)
+        plt.plot(list_nums, list_num_ratio_twin_gp, 'b.', ms=1)
+        plt.plot(list_nums, list_num_ratio_twin_gp_avg, 'r.', ms=1)
+        blue_patch = mpatches.Patch(color='blue', label='ratio')
+        red_patch = mpatches.Patch(color='red', label='avg')
+        plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.9, 0.9))
+        plt.xlabel('n')
+        plt.ylabel('Ratio')
+        plt.title('Ratio: # of twin primes / # of primes in Goldbach partions')
+        plt.grid(True)
+        plt.savefig(directory + "/f_ratio_twin_primes_to_all_primes.png")
+
+        plt.figure(17)
+        plt.plot(list_zero_twin_lesser, list_zero_twin_lesser_count, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('Count of even numbers without lesser twin prime in GP')
+        plt.grid(True)
+        plt.savefig(directory + "/f_counter_no_lesser_twin_prime.png")
+
+        plt.figure(18)
+        plt.plot(list_zero_twin_greater, list_zero_twin_greater_count, 'r.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('Count of even numbers without greater twin prime in GP')
+        plt.grid(True)
+        plt.savefig(directory + "/f_counter_no_greater_twin_prime.png")
+
+        plt.figure(19)
+        plt.bar(list_zero_twin_lesser, [1]*len(list_zero_twin_lesser), color='blue')
+        plt.bar(list_zero_twin_greater, [1]*len(list_zero_twin_greater), color='red')
+        blue_patch = mpatches.Patch(color='blue', label='no of lesser twin primes')
+        red_patch = mpatches.Patch(color='red', label='no of greater twin primes')
+        plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.8, 0.8))
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('Numbers without lesser and greater twin prime in GP')
+        plt.grid(True)
+        plt.savefig(directory + "/f_no_twin_prime.png")
+
+        plt.figure(20)
+        plt.plot(list_nums, list_num_diff_twin_greater_lesser_distinct, 'b.', ms=1)
+        plt.plot(list_nums, list_num_diff_twin_greater_lesser_distinct_avg, 'r.', ms=1)
+        blue_patch = mpatches.Patch(color='blue', label='diff')
+        red_patch = mpatches.Patch(color='red', label='avg')
+        plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.9, 0.9))
+        plt.xlabel('n')
+        plt.ylabel('Diff')
+        plt.title('Diff between distinct greater and lesser twin primes in GP')
+        plt.grid(True)
+        plt.savefig(directory + "/f_diff_greater_lesser_twin_primes.png")
+
 
 #############################################################
 # Main - Phase 1
