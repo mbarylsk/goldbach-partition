@@ -55,11 +55,12 @@ caching_primality_results = False
 check_regular = False
 # Check stats related to twin primes
 check_twins = True
+check_twins_extended = False
 
 min_num = 2
-max_num = 10000
+max_num = 500000
 step_factor = 2
-checkpoint_value = 1000
+checkpoint_value = 5000
 big_prime_threshold = 100
 min_prime_count_threshold = 500
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
@@ -250,20 +251,19 @@ def calculate_metrics (num, factors, dp, p):
                     elif p1 < min_twin_greater:
                         min_twin_greater = p1
 
+        list_num_twin_all.append (number_of_twins)
+        list_num_ratio_twin_gp.append(number_of_twins/(num_of_pairs*2))
+        list_num_ratio_twin_gp_avg.append(dp.get_avg_value_from_list (list_num_ratio_twin_gp))
+        
+    if check_twins_extended:
         number_of_twins_lesser_distinct = len(set_twins_lesser)
         number_of_twins_greater_distinct = len(set_twins_greater)
-
-        list_num_twin_all.append (number_of_twins)
         list_num_twin_lesser.append (number_of_twins_lesser)
         list_num_twin_greater.append (number_of_twins_greater)
         list_num_twin_lesser_distinct.append (number_of_twins_lesser_distinct)
         list_num_twin_greater_distinct.append (number_of_twins_greater_distinct)
-
         list_num_diff_twin_greater_lesser_distinct.append (number_of_twins_greater_distinct-number_of_twins_lesser_distinct)
         list_num_diff_twin_greater_lesser_distinct_avg.append (dp.get_avg_value_from_list (list_num_diff_twin_greater_lesser_distinct))
-
-        list_num_ratio_twin_gp.append(number_of_twins/(num_of_pairs*2))
-        list_num_ratio_twin_gp_avg.append(dp.get_avg_value_from_list (list_num_ratio_twin_gp))
         
         if number_of_twins_lesser_distinct == 0:
             list_zero_twin_lesser.append(num)
@@ -447,7 +447,7 @@ def write_results_to_figures (directory, last_loop):
         plt.grid(True)
         plt.savefig(directory + "/f_min_prime_in_sum_histogram.png")
 
-    if check_twins:
+    if check_twins_extended:
         plt.figure(10)
         plt.plot(list_nums, list_num_twin_lesser, 'b.', ms=1)
         plt.xlabel('n')
@@ -463,14 +463,6 @@ def write_results_to_figures (directory, last_loop):
         plt.title('Number of greater twin primes in Goldbach partition of n')
         plt.grid(True)
         plt.savefig(directory + "/f_twin_primes_greater.png")
-
-        plt.figure(12)
-        plt.plot(list_nums, list_num_twin_all, 'b.', ms=1)
-        plt.xlabel('n')
-        plt.ylabel('Number of twin primes')
-        plt.title('Number of twin primes in Goldbach partition of n')
-        plt.grid(True)
-        plt.savefig(directory + "/f_twin_primes_all.png")
 
         plt.figure(13)
         plt.plot(list_nums, list_num_twin_lesser_distinct, 'b.', ms=1)
@@ -497,18 +489,6 @@ def write_results_to_figures (directory, last_loop):
         plt.title('Number of distinct twin primes in Goldbach partition of n')
         plt.grid(True)
         plt.savefig(directory + "/f_twin_primes_lesser_greater_distinct.png")
-
-        plt.figure(16)
-        plt.plot(list_nums, list_num_ratio_twin_gp, 'b.', ms=1)
-        plt.plot(list_nums, list_num_ratio_twin_gp_avg, 'r.', ms=1)
-        blue_patch = mpatches.Patch(color='blue', label='ratio')
-        red_patch = mpatches.Patch(color='red', label='avg')
-        plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.9, 0.9))
-        plt.xlabel('n')
-        plt.ylabel('Ratio')
-        plt.title('Ratio: # of twin primes / # of primes in Goldbach partions')
-        plt.grid(True)
-        plt.savefig(directory + "/f_ratio_twin_primes_to_all_primes.png")
 
         plt.figure(17)
         plt.plot(list_zero_twin_lesser, list_zero_twin_lesser_count, 'b.', ms=1)
@@ -550,6 +530,26 @@ def write_results_to_figures (directory, last_loop):
         plt.grid(True)
         plt.savefig(directory + "/f_diff_greater_lesser_twin_primes.png")
 
+    if check_twins:
+        plt.figure(12)
+        plt.plot(list_nums, list_num_twin_all, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Number of twin primes')
+        plt.title('Number of twin primes in Goldbach partition of n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_twin_primes_all.png")
+
+        plt.figure(16)
+        plt.plot(list_nums, list_num_ratio_twin_gp, 'b.', ms=1)
+        plt.plot(list_nums, list_num_ratio_twin_gp_avg, 'r.', ms=1)
+        blue_patch = mpatches.Patch(color='blue', label='ratio')
+        red_patch = mpatches.Patch(color='red', label='avg')
+        plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.9, 0.9))
+        plt.xlabel('n')
+        plt.ylabel('Ratio')
+        plt.title('Ratio: # of twin primes / # of primes in Goldbach partions')
+        plt.grid(True)
+        plt.savefig(directory + "/f_ratio_twin_primes_to_all_primes.png")
 
 #############################################################
 # Main - Phase 1
