@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 - 2017, Marcin Barylski
+# Copyright (c) 2016 - 2018, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -69,11 +69,19 @@ class GoldbachPartition:
             delta = 2
         return delta
 
+    # skip first prime: 2
     def delta_prime (self, iteration):
         if iteration == 0:
             delta = 0
         else:
             delta = self.primes.get_ith_prime(iteration + 1) - self.primes.get_ith_prime(iteration)
+        return delta
+
+    def delta_twinprime (self, iteration):
+        if iteration == 0:
+            delta = 0
+        else:
+            delta = self.primes.get_ith_twinprime(iteration) - self.primes.get_ith_twinprime(iteration - 1)
         return delta
 
     def delta_3kmin1 (self, iteration):
@@ -89,15 +97,15 @@ class GoldbachPartition:
         iteration = 0
 
         startTime = time.time()
-        while (not found):
+        while not found:
             iteration += 1
             if (self.primes.is_prime (p1) and self.primes.is_prime (p2)):
                 found = True
-            if (not found):
+            if not found:
                 p1 = p1 + delta (iteration)
                 p2 = p2 - delta (iteration)
             if p2 < 2 or p1 < 2:
-                raise Exception ("Could not find GP")
+                raise Exception ("Could not find GP for ", p1 + p2)
         duration = time.time() - startTime
         return p1, p2, duration, iteration
 

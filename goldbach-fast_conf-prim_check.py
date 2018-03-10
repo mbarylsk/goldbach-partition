@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 - 2017, Marcin Barylski
+# Copyright (c) 2016 - 2018, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -48,10 +48,10 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 1000
+max_num = 200000000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 10
+checkpoint_value = 200000
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -61,12 +61,13 @@ checkpoint_value = 10
 caching_primality_results = False
 
 # Algorithms to be checked
-algo_to_check = {'a1', 'a2', 'a3', 'a4', 'a5', 'a6'}
+algo_to_check = {'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7'}
 
 # Helper files
 #   o file_input_primes - contains prime numbers
 #   o file_input_nonprimes - contains composite numbers
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
+file_input_twinprimes = '..\\primes\\t_twinprime_numbers.txt'
 file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 
 #############################################################
@@ -89,6 +90,8 @@ if 'a5' in algo_to_check:
     algo += "a5"
 if 'a6' in algo_to_check:
     algo += "a6"
+if 'a7' in algo_to_check:
+    algo += "a7"
 file_output_iters_alg = directory + "/f_checkpoint_iters_alg" + algo + ".png"
 file_output_iters_prob_alg = directory + "/f_checkpoint_iters_prob_alg" + algo + ".png"
 file_output_duration_alg = directory + "/f_checkpoint_duration_alg" + algo + ".png"
@@ -98,14 +101,14 @@ file_output_pickle = directory + "/objs.pickle"
 # Results of calculations
 #############################################################
 
-dt_diff = [0, 0, 0, 0, 0, 0]
-dt_iter = [0, 0, 0, 0, 0, 0]
-list_iter_which = [[], [], [], [], [], []]
-list_iter_which_prob = [[], [], [], [], [], []]
+dt_diff =                   [0, 0, 0, 0, 0, 0, 0]
+dt_iter =                   [0, 0, 0, 0, 0, 0, 0]
+list_iter_which =           [[], [], [], [], [], [], []]
+list_iter_which_prob =      [[], [], [], [], [], [], []]
 
-list_checkpoints_duration = [[], [], [], [], [], []]
-list_checkpoints_iters = [[], [], [], [], [], []]
-list_checkpoints = []
+list_checkpoints_duration = [[], [], [], [], [], [], []]
+list_checkpoints_iters =    [[], [], [], [], [], [], []]
+list_checkpoints =          []
 
 k_current = 0
 
@@ -149,6 +152,7 @@ def write_results_to_figures (directory):
     y_patch = mpatches.Patch(color='yellow', label='A4')
     c_patch = mpatches.Patch(color='cyan', label='A5')
     m_patch = mpatches.Patch(color='magenta', label='A6')
+    k_patch = mpatches.Patch(color='black', label='A7')
 
     list_of_handles = []
     if 'a1' in algo_to_check:
@@ -169,6 +173,9 @@ def write_results_to_figures (directory):
     if 'a6' in algo_to_check:
         plt.plot(list_checkpoints, list_checkpoints_duration[5], 'm.', ms=2)
         list_of_handles.append(m_patch)
+    if 'a7' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_duration[6], 'k.', ms=2)
+        list_of_handles.append(k_patch)
 
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('n')
@@ -191,6 +198,8 @@ def write_results_to_figures (directory):
         plt.plot(list_checkpoints, list_checkpoints_iters[4], 'c.', ms=2)
     if 'a6' in algo_to_check:
         plt.plot(list_checkpoints, list_checkpoints_iters[5], 'm.', ms=2)
+    if 'a7' in algo_to_check:
+        plt.plot(list_checkpoints, list_checkpoints_iters[6], 'k.', ms=2)
 
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.xlabel('n')
@@ -220,6 +229,9 @@ def write_results_to_figures (directory):
     if 'a6' in algo_to_check:
         list_iter_which_prob[5] = calculate_percents (list_iter_which[5])
         plt.plot(list_iter_which_prob[5], 'm-', ms=2)
+    if 'a7' in algo_to_check:
+        list_iter_which_prob[6] = calculate_percents (list_iter_which[6])
+        plt.plot(list_iter_which_prob[6], 'k-', ms=2)
 
     plt.yscale('log')
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
@@ -249,11 +261,13 @@ p = primes.Primes(caching_primality_results)
 gp = goldbach.GoldbachPartition (p)
 print ("DONE")
 print ("Loading helper sets...")
-p.init_set(file_input_primes, True)
-p.init_set(file_input_nonprimes, False)
+p.init_set(file_input_primes, 1)
+p.init_set(file_input_twinprimes, 2)
+p.init_set(file_input_nonprimes, 3)
 print ("DONE")
 print ("Sorting primes...")
-p.sort_prime_set()
+p.sort_primes_set()
+p.sort_twinprimes_set()
 print ("DONE")
 print ("Restoring previous results...")
 restore_previous_results (file_output_pickle)
@@ -279,7 +293,7 @@ for k in range (min_num, max_num):
         else:
             p2 = p1
 
-        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_constant_minus_2(iteration))
+        (p1, p2, duration, iterations) = gp.search_for_partition (int(p1), int(p2), lambda iteration: gp.delta_constant_minus_2(iteration))
         update_algo_results (0, duration, iterations)
 
         if p1 + p2 != num:
@@ -347,6 +361,18 @@ for k in range (min_num, max_num):
 
         if p1 + p2 != num:
             print ("Alg #6: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+
+    # algorithm 7
+    # A6 but next p1 is always twin prime
+    if 'a7' in algo_to_check:
+        p1 = 3
+        p2 = num - 3
+
+        (p1, p2, duration, iterations) = gp.search_for_partition (p1, p2, lambda iteration: gp.delta_twinprime(iteration))
+        update_algo_results (6, duration, iterations)
+
+        if p1 + p2 != num:
+            print ("Alg #7: violation of sum for p1=", p1, "p2=", p2, "n=", num)
     
     # checkpoint - partial results
     if num % checkpoint_value == 0:
@@ -371,6 +397,9 @@ for k in range (min_num, max_num):
         if 'a6' in algo_to_check:
             list_checkpoints_duration[5].append(dt_diff[5])
             list_checkpoints_iters[5].append(dt_iter[5])
+        if 'a7' in algo_to_check:
+            list_checkpoints_duration[6].append(dt_diff[6])
+            list_checkpoints_iters[6].append(dt_iter[6])
 
         perc_completed = str(int(k * 100 / max_num))
         print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")

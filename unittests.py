@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 - 2017, Marcin Barylski
+# Copyright (c) 2016 - 2018, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -72,14 +72,17 @@ class TestMethods(unittest.TestCase):
 
     def test_get_ith_prime(self):
         p = primes.Primes(False)
-        p.add_to_prime_set(2)
-        p.add_to_prime_set(3)
-        p.add_to_prime_set(5)
-        p.add_to_prime_set(7)
-        p.sort_prime_set()
         self.assertEqual(p.get_ith_prime(0), 2)
         self.assertEqual(p.get_ith_prime(1), 3)
         self.assertEqual(p.get_ith_prime(2), 5)
+
+    def test_get_ith_twinprime(self):
+        p = primes.Primes(False)
+        self.assertEqual(p.get_ith_twinprime(0), 3)
+        self.assertEqual(p.get_ith_twinprime(1), 5)
+        self.assertEqual(p.get_ith_twinprime(2), 7)
+        self.assertEqual(p.get_ith_twinprime(3), 11)
+        self.assertEqual(p.get_ith_twinprime(4), 13)
 
     def test_search_for_partition_a1(self):
         p = primes.Primes(False)
@@ -108,11 +111,11 @@ class TestMethods(unittest.TestCase):
     def test_search_for_partition_a6(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
-        p.add_to_prime_set(2)
-        p.add_to_prime_set(3)
-        p.add_to_prime_set(5)
-        p.add_to_prime_set(7)
-        p.sort_prime_set()
+        p.add_to_primes_set(2)
+        p.add_to_primes_set(3)
+        p.add_to_primes_set(5)
+        p.add_to_primes_set(7)
+        p.sort_primes_set()
         (p1, p2, duration, iterations) = gp.search_for_partition (3, 5, lambda iteration: gp.delta_prime(iteration))
         self.assertEqual (p1, 3)
         self.assertEqual (p2, 5)
@@ -146,7 +149,7 @@ class TestMethods(unittest.TestCase):
     def test_search_for_difference(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
-        p.sort_prime_set()
+        p.sort_primes_set()
         (p1, p2, duration, iterations) = gp.search_for_difference (2)
         self.assertEqual (p1, 3)
         self.assertEqual (p2, 5)
@@ -163,7 +166,7 @@ class TestMethods(unittest.TestCase):
     def test_reduce_prime_for_goldbach_min(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
-        p.sort_prime_set()
+        p.sort_primes_set()
         (n, q, res) = gp.reduce_prime_for_goldbach (5, False)
         self.assertEqual (n, 1)
         self.assertEqual (q, 3)
@@ -180,7 +183,7 @@ class TestMethods(unittest.TestCase):
     def test_reduce_prime_for_goldbach_max(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)
-        p.sort_prime_set()
+        p.sort_primes_set()
         (n, q, res) = gp.reduce_prime_for_goldbach (5, True)
         self.assertEqual (n, 1)
         self.assertEqual (q, 3)
