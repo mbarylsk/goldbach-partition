@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017, Marcin Barylski
+# Copyright (c) 2017 - 2018, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -38,7 +38,7 @@ import primes
 #############################################################
 
 min_prime_index = 1
-max_prime_index = 1000000
+max_prime_index = 200
 max_num = max_prime_index - min_prime_index
 checkpoint_value = 5000
 
@@ -228,11 +228,11 @@ p = primes.Primes(caching_primality_results)
 gp = goldbach.GoldbachPartition (p)
 print ("DONE")
 print ("Loading helper sets...")
-p.init_set(file_input_primes, True)
-p.init_set(file_input_nonprimes, False)
+p.init_set(file_input_primes, 1)
+p.init_set(file_input_nonprimes, 2)
 print ("DONE")
 print ("Sorting primes...")
-p.sort_prime_set()
+p.sort_primes_set()
 print ("DONE")
 
 dt_start = datetime.now()
@@ -278,6 +278,11 @@ elif method == 2:
             p2 = p.get_ith_prime(ip2)
             num = p1 + p2
             remove_nums_to_be_verified (num, 2*p1)
+
+        if len(to_be_verified) == 0:
+            print ("+-----------------------------------------------------------------------------------------------------")
+            print ("| Interesting - For iteration", k, "(this is prime", p1, ") I have verified all possible numbers till", num)
+            print ("+-----------------------------------------------------------------------------------------------------")
 
         # checkpoint - partial results
         if k % checkpoint_value == 0:
