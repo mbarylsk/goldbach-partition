@@ -1,5 +1,5 @@
-#
-# Copyright (c) 2016 - 2017, Marcin Barylski
+    #
+# Copyright (c) 2016 - 2018, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -48,10 +48,10 @@ min_num = 3
 step_factor = 1
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 40000
+max_num = 600
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 500
+checkpoint_value = 5
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -172,11 +172,11 @@ p = primes.Primes(caching_primality_results)
 gp = goldbach.GoldbachPartition (p)
 print ("DONE")
 print ("Loading helper sets...")
-p.init_set(file_input_primes, True)
-p.init_set(file_input_nonprimes, False)
+p.init_set(file_input_primes, 1)
+p.init_set(file_input_nonprimes, 3)
 print ("DONE")
 print ("Sorting primes...")
-p.sort_prime_set()
+p.sort_primes_set()
 print ("DONE")
 print ("Restoring previous results...")
 restore_previous_results (file_output_pickle)
@@ -213,39 +213,39 @@ for k in range (min_num, max_num):
         if (p1 + p2)/2 != num:
             print ("Alg #2: violation of sum for p1=", p1, "p2=", p2, "n=", num)
 
-##    # algorithm 3
-##    # next candidate based on form of num 6a+i
-##    if 'a3' in algo_to_check:
-##        if num == 2:
-##            p1 = 2
-##            p2 = 2
-##            iterations = 0
-##            duration = 0
-##        elif num == 3:
-##            p1 = 3
-##            p2 = 3
-##            iterations = 0
-##            duration = 0
-##        elif num == 4:
-##            p1 = 3
-##            p2 = 5
-##            iterations = 0
-##            duration = 0
-##        elif num == 5:
-##            p1 = 5
-##            p2 = 5
-##            iterations = 0
-##            duration = 0
-##        elif num % 6 == 0 or num % 6 == 3:
-##            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant(iteration))
-##        elif num % 6 == 1 or num % 6 == 4:
-##            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant(iteration))
-##        else:
-##            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant(iteration))
-##        update_algo_results (2, duration, iterations)
-##        
-##        if (p1 + p2)/2 != num:
-##            print ("Alg #3: violation of sum for p1=", p1, "p2=", p2, "n=", num)
+    # algorithm 3
+    # next candidate based on form of num 6a+i
+    if 'a3' in algo_to_check:
+        if num == 2:
+            p1 = 2
+            p2 = 2
+            iterations = 0
+            duration = 0
+        elif num == 3:
+            p1 = 3
+            p2 = 3
+            iterations = 0
+            duration = 0
+        elif num == 4:
+            p1 = 3
+            p2 = 5
+            iterations = 0
+            duration = 0
+        elif num == 5:
+            p1 = 5
+            p2 = 5
+            iterations = 0
+            duration = 0
+        elif num % 6 == 0 or num % 6 == 3:
+            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant_minus_1(iteration))
+        elif num % 6 == 1 or num % 6 == 4:
+            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant_minus_1(iteration))
+        else:
+            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant_minus_1(iteration))
+        update_algo_results (2, duration, iterations)
+        
+        if (p1 + p2)/2 != num:
+            print ("Alg #3: violation of sum for p1=", p1, "p2=", p2, "n=", num)
     
     # checkpoint - partial results
     if num % checkpoint_value == 0:
@@ -259,8 +259,8 @@ for k in range (min_num, max_num):
             list_checkpoints_duration[1].append(dt_diff[1])
             list_checkpoints_iters[1].append(dt_iter[1])
         if 'a3' in algo_to_check:
-            list_checkpoints_duration[2].append(dt_diff[1])
-            list_checkpoints_iters[2].append(dt_iter[1])
+            list_checkpoints_duration[2].append(dt_diff[2])
+            list_checkpoints_iters[2].append(dt_iter[2])
 
         perc_completed = str(int(k * 100 / max_num))
         print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
