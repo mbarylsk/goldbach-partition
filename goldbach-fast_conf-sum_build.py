@@ -38,7 +38,7 @@ import primes
 #############################################################
 
 min_prime_index = 1
-max_prime_index = 200
+max_prime_index = 20000
 max_num = max_prime_index - min_prime_index
 checkpoint_value = 5000
 
@@ -69,7 +69,8 @@ if not os.path.exists(directory):
     os.makedirs(directory)
 file_output_fig1 = directory + "/f_sumbuild_effectiveness.png"
 file_output_fig2 = directory + "/f_sumbuild_spare_and_to_be_verified.png"
-file_output_fig3 = directory + "/f_sumbuild_diff.png"
+file_output_fig3 = directory + "/f_sumbuild_diff_and_delta.png"
+file_output_fig4 = directory + "/f_sumbuild_diff.png"
 file_output_pickle = directory + "/objs_sym_primes.pickle"
 
 #############################################################
@@ -89,8 +90,8 @@ list_num_where_all_verified = []
 list_to_be_verified = []
 list_already_verified = []
 list_num_max = []
-list_max_actual_diff = []
-list_max_actual_diff_perc = []
+# [0] - actual diff, [1] - delta between two consecutive diffs
+list_diff = [[],[]]
 list_iters = []
 list_checkpoints = []
 
@@ -149,7 +150,7 @@ def get_data_from_verified_intervals ():
 # Presentation
 #############################################################
 
-def print_stats_1 (i):
+def print_results_1 (i):
     (miss_nums, num_min, num_max) = get_data_from_verified_intervals()
     print ("================================================================================")
     print ("Iteration:", i)
@@ -161,8 +162,8 @@ def print_stats_1 (i):
     else:
         print (" Missing nums :", miss_nums)
 
-def print_stats_2 (i):
-    global to_be_verified, num_where_all_verified
+def print_results_2 (i):
+    global to_be_verified, num_where_all_verified, already_verified, list_diff
     print ("===============================================================================")
     print ("Iteration:", i)
     print (" Even numbers to be verified:", to_be_verified)
@@ -170,6 +171,7 @@ def print_stats_2 (i):
     print (" All even numbers verified up to:", num_where_all_verified)
     print (" Spare verified numbers:", already_verified)
     print (" # of spare verified numbers:", len(already_verified))
+    print (" Current vs. theoretical max:", list_diff[0])
 
     fig1 = plt.figure(1)
     r_patch = mpatches.Patch(color='red', label='all verified')
@@ -210,14 +212,27 @@ def print_stats_2 (i):
     list_of_handles.append(r_patch)
     list_of_handles.append(g_patch)
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
-    plt.plot(list_checkpoints, list_max_actual_diff, 'r-', ms=1)
-    plt.plot(list_checkpoints, list_max_actual_diff_perc, 'g-', ms=1)
+    plt.plot(list_checkpoints, list_diff[0], 'r-', ms=1)
+    plt.plot(list_checkpoints, list_diff[1], 'g-', ms=1)
     plt.xlabel('iteration')
     plt.ylabel('difference')
-    plt.title('Difference between actual and theoretical minimum')
+    plt.title('Difference between actual and theoretical max (and delta)')
     plt.grid(True)
     plt.savefig(file_output_fig3)
     plt.close(fig3)
+
+    fig4 = plt.figure(1)
+    b_patch = mpatches.Patch(color='blue', label='diff')
+    list_of_handles = []
+    list_of_handles.append(b_patch)
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.plot(list_checkpoints, list_diff[0], 'b.', ms=1)
+    plt.xlabel('iteration')
+    plt.ylabel('difference')
+    plt.title('Difference between actual and theoretical max')
+    plt.grid(True)
+    plt.savefig(file_output_fig4)
+    plt.close(fig4)
 
 #############################################################
 # Main
@@ -262,7 +277,7 @@ if method == 1:
             perc_completed = str(int(k * 100 / max_num))
             print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
         
-            print_stats_1 (k)
+            print_results_1 (k)
 
 
         k += 1
@@ -292,14 +307,14 @@ elif method == 2:
             perc_completed = str(int(k * 100 / max_num))
             print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
         
-            print_stats_2 (k)
+            print_results_2 (k)
 
         list_checkpoints.append (k)
         list_num_where_all_verified.append (num_where_all_verified)
         list_num_max.append (num)
         diff_now = num - num_where_all_verified
-        list_max_actual_diff.append (diff_now)
-        list_max_actual_diff_perc.append (abs(diff_now - diff_previous))
+        list_diff[0].append (diff_now)
+        list_diff[1].append (abs(diff_now - diff_previous))
         if num == num_where_all_verified:
             print ("Verified all till max for iteration", k)
         list_to_be_verified.append(len(to_be_verified))
@@ -314,8 +329,8 @@ dt_end = datetime.now()
 # final results - time of processing
 dt_diff = dt_end - dt_start
 if method == 1:
-    print_stats_1 (k)
+    print_results_1 (k)
 elif method == 2:
-    print_stats_2 (k)
+    print_results_2 (k)
 
 print ("Total calculations lasted:", dt_diff)
