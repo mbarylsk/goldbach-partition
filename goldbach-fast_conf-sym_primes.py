@@ -48,10 +48,10 @@ min_num = 3
 step_factor = 1
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 600
+max_num = 400000000
 
 # Checkpoint value when partial results are drawn/displayed
-checkpoint_value = 5
+checkpoint_value = 200000
 
 # Caching previous primality results
 #   o True  - auxilary sets of primes and composite numbers will grow
@@ -61,7 +61,7 @@ checkpoint_value = 5
 caching_primality_results = False
 
 # Algorithms to be checked
-algo_to_check = {'a1', 'a2', 'a3'}
+algo_to_check = {'a1', 'a2'}
 
 # Helper files
 #   o file_input_primes - contains prime numbers
@@ -237,11 +237,11 @@ for k in range (min_num, max_num):
             iterations = 0
             duration = 0
         elif num % 6 == 0 or num % 6 == 3:
-            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant_minus_1(iteration))
+            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_variable_3x(iteration))
         elif num % 6 == 1 or num % 6 == 4:
-            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant_minus_1(iteration))
+            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_variable_3xplus1(iteration))
         else:
-            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_constant_minus_1(iteration))
+            (p1, p2, duration, iterations) = gp.search_for_sym_primes (num, lambda iteration: gp.delta_variable_3xminus1(iteration))
         update_algo_results (2, duration, iterations)
         
         if (p1 + p2)/2 != num:

@@ -69,6 +69,27 @@ class GoldbachPartition:
             delta = 2
         return delta
 
+    def delta_variable_3x (self, iteration):
+        if iteration < 2:
+            delta = 0
+        else:
+            delta = 3*iteration
+        return delta
+
+    def delta_variable_3xplus1 (self, iteration):
+        if iteration < 2:
+            delta = 0
+        else:
+            delta = 3*iteration + 1
+        return delta
+
+    def delta_variable_3xminus1 (self, iteration):
+        if iteration < 2:
+            delta = 0
+        else:
+            delta = 3*iteration - 1
+        return delta
+
     # skip first prime: 2
     def delta_prime (self, iteration):
         if iteration == 0:
