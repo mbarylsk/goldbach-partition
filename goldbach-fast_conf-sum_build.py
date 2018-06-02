@@ -30,6 +30,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import goldbach
+import pickle
 sys.path.insert(0, '..\\primes\\')
 import primes
 
@@ -38,7 +39,7 @@ import primes
 #############################################################
 
 min_prime_index = 1
-max_prime_index = 20000
+max_prime_index = 1000000
 max_num = max_prime_index - min_prime_index
 checkpoint_value = 5000
 
@@ -48,6 +49,11 @@ checkpoint_value = 5000
 #             be occupied
 #   o False - do not cache new primality test results
 caching_primality_results = False
+
+# Detecting terms of http://oeis.org/A301776
+#   o True  - detect terms
+#   o False - do not detect terms
+detect_no_backlog = True
 
 # Methods:
 #   o method 1 - check all possible sums of primes, build all possible GPs
@@ -86,14 +92,18 @@ to_be_verified = set()
 already_verified = set()
 num_where_all_verified = 4
 
-list_num_where_all_verified = []
-list_to_be_verified = []
-list_already_verified = []
-list_num_max = []
+list_num_where_all_verified =   []
+list_to_be_verified =           []
+list_already_verified =         []
+list_num_max =                  []
 # [0] - actual diff, [1] - delta between two consecutive diffs
-list_diff = [[],[]]
-list_iters = []
-list_checkpoints = []
+list_diff =                     [[],[]]
+list_checkpoints =              []
+list_A301776 =                  [2]
+
+k_current = 0
+k = 0
+diff_previous = 0
 
 #############################################################
 # Business logic
@@ -146,6 +156,19 @@ def get_data_from_verified_intervals ():
         item_previous = item
     return (missing, min(list_verified_intervals), max(list_verified_intervals))
 
+def save_current_results (file_output_pickle):
+    global k_current, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous
+    global local_primes, lp_sum, verified_intervals, list_A301776
+    with open(file_output_pickle, 'wb') as f:
+        pickle.dump([k_current, list_A301776, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous, local_primes, lp_sum, verified_intervals], f)
+
+def restore_previous_results (file_output_pickle):
+    global k_current, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous
+    global local_primes, lp_sum, verified_intervals, list_A301776
+    if os.path.exists(file_output_pickle):
+        with open(file_output_pickle, 'rb') as f:
+            k_current, list_A301776, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous, local_primes, lp_sum, verified_intervals = pickle.load(f)
+
 #############################################################
 # Presentation
 #############################################################
@@ -172,6 +195,7 @@ def print_results_2 (i):
     print (" Spare verified numbers:", already_verified)
     print (" # of spare verified numbers:", len(already_verified))
     print (" Current vs. theoretical max:", list_diff[0])
+    print (" A301776:", list_A301776)
 
     fig1 = plt.figure(1)
     r_patch = mpatches.Patch(color='red', label='all verified')
@@ -249,13 +273,16 @@ print ("DONE")
 print ("Sorting primes...")
 p.sort_primes_set()
 print ("DONE")
+print ("Restoring previous results...")
+restore_previous_results (file_output_pickle)
+if k_current > 0:
+    min_prime_index = k_current
+    k = k_current
+    print ("Resuming calculations at", min_prime_index)
+print ("DONE")
 
 dt_start = datetime.now()
 dt_current_previous = dt_start
-
-k = 0
-diff_previous = 0
-iterations = 0
 
 # new calculations
 if method == 1: 
@@ -278,7 +305,8 @@ if method == 1:
             print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
         
             print_results_1 (k)
-
+            k_current = k
+            save_current_results(file_output_pickle)
 
         k += 1
     
@@ -286,18 +314,21 @@ elif method == 2:
     
     for ip1 in range (min_prime_index, max_prime_index):
 
+        # check all possible sums
         p1 = p.get_ith_prime(ip1)
         add_nums_to_be_verified (2*p1)
-    
         for ip2 in range (1, ip1+1):
             p2 = p.get_ith_prime(ip2)
             num = p1 + p2
             remove_nums_to_be_verified (num, 2*p1)
 
-        if len(to_be_verified) == 0:
-            print ("+-----------------------------------------------------------------------------------------------------")
-            print ("| Interesting - For iteration", k, "(this is prime", p1, ") I have verified all possible numbers till", num)
-            print ("+-----------------------------------------------------------------------------------------------------")
+        # special case - max == current (no backlog)
+        if detect_no_backlog:
+            if len(to_be_verified) == 0:
+                print ("+-----------------------------------------------------------------------------------------------------")
+                print ("| Interesting - For iteration", k, "(this is prime", p1, ") I have verified all possible numbers till", num)
+                print ("+-----------------------------------------------------------------------------------------------------")
+                list_A301776.append (p1)
 
         # checkpoint - partial results
         if k % checkpoint_value == 0:
@@ -308,6 +339,8 @@ elif method == 2:
             print ("Checkpoint", k, "of total", max_num, "took", dt_diff_current, "seconds. (" + perc_completed + "% completed)")
         
             print_results_2 (k)
+            k_current = k
+            save_current_results(file_output_pickle)
 
         list_checkpoints.append (k)
         list_num_where_all_verified.append (num_where_all_verified)
@@ -319,7 +352,6 @@ elif method == 2:
             print ("Verified all till max for iteration", k)
         list_to_be_verified.append(len(to_be_verified))
         list_already_verified.append(len(already_verified))
-        list_iters.append(iterations)
         
         k += 1
         diff_previous = diff_now
@@ -332,5 +364,7 @@ if method == 1:
     print_results_1 (k)
 elif method == 2:
     print_results_2 (k)
+k_current = max_num
+save_current_results(file_output_pickle)
 
 print ("Total calculations lasted:", dt_diff)
