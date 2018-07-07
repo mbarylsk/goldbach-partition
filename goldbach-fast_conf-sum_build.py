@@ -33,13 +33,14 @@ import goldbach
 import pickle
 sys.path.insert(0, '..\\primes\\')
 import primes
+import dataprocessing
 
 #############################################################
 # Settings - configuration
 #############################################################
 
 min_prime_index = 1
-max_prime_index = 1000000
+max_prime_index = 100000
 max_num = max_prime_index - min_prime_index
 checkpoint_value = 5000
 
@@ -77,6 +78,8 @@ file_output_fig1 = directory + "/f_sumbuild_effectiveness.png"
 file_output_fig2 = directory + "/f_sumbuild_spare_and_to_be_verified.png"
 file_output_fig3 = directory + "/f_sumbuild_diff_and_delta.png"
 file_output_fig4 = directory + "/f_sumbuild_diff.png"
+file_output_fig5 = directory + "/f_sumbuild_ratio_to_be_ver.png"
+file_output_fig6 = directory + "/f_sumbuild_ratio_alr_ver.png"
 file_output_pickle = directory + "/objs_sym_primes.pickle"
 
 #############################################################
@@ -95,10 +98,17 @@ num_where_all_verified = 4
 list_num_where_all_verified =   []
 list_to_be_verified =           []
 list_already_verified =         []
+list_to_be_verified_avg =       []
+list_already_verified_avg =     []
 list_num_max =                  []
 # [0] - actual diff, [1] - delta between two consecutive diffs
 list_diff =                     [[],[]]
 list_checkpoints =              []
+# [0] - diff/# of to be verified, [1] - diff/# of already verified
+list_ratio =                    [[],[]]
+# [0] - average of list_ratio[0], [1] - average of list_ratio[1]
+list_ratio_avg =                [[],[]]
+# http://oeis.org/A301776
 list_A301776 =                  [2]
 
 k_current = 0
@@ -157,17 +167,17 @@ def get_data_from_verified_intervals ():
     return (missing, min(list_verified_intervals), max(list_verified_intervals))
 
 def save_current_results (file_output_pickle):
-    global k_current, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous
+    global k_current, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_to_be_verified_avg, list_already_verified_avg, list_num_max, list_diff, list_ratio, list_ratio_avg, list_checkpoints, diff_previous
     global local_primes, lp_sum, verified_intervals, list_A301776
     with open(file_output_pickle, 'wb') as f:
-        pickle.dump([k_current, list_A301776, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous, local_primes, lp_sum, verified_intervals], f)
+        pickle.dump([k_current, list_A301776, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_to_be_verified_avg, list_already_verified_avg, list_num_max, list_diff, list_ratio, list_ratio_avg, list_checkpoints, diff_previous, local_primes, lp_sum, verified_intervals], f)
 
 def restore_previous_results (file_output_pickle):
-    global k_current, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous
+    global k_current, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_to_be_verified_avg, list_already_verified_avg, list_num_max, list_diff, list_ratio, list_ratio_avg, list_checkpoints, diff_previous
     global local_primes, lp_sum, verified_intervals, list_A301776
     if os.path.exists(file_output_pickle):
         with open(file_output_pickle, 'rb') as f:
-            k_current, list_A301776, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_num_max, list_diff, list_checkpoints, diff_previous, local_primes, lp_sum, verified_intervals = pickle.load(f)
+            k_current, list_A301776, to_be_verified, already_verified, num_where_all_verified, list_num_where_all_verified, list_to_be_verified, list_already_verified, list_to_be_verified_avg, list_already_verified_avg, list_num_max, list_diff, list_ratio, list_ratio_avg, list_checkpoints, diff_previous, local_primes, lp_sum, verified_intervals = pickle.load(f)
 
 #############################################################
 # Presentation
@@ -194,8 +204,12 @@ def print_results_2 (i):
     print (" All even numbers verified up to:", num_where_all_verified)
     print (" Spare verified numbers:", already_verified)
     print (" # of spare verified numbers:", len(already_verified))
-    print (" Current vs. theoretical max:", list_diff[0])
+    print (" Current vs. theoretical max (diff):", list_diff[0][i])
+    print (" Delta in diff between two last iterations:", list_diff[1][i])
     print (" A301776:", list_A301776)
+    print (" diff / # of numbers to be verified:", list_ratio_avg[0][i])
+    print (" diff / # of numbers to already verified:", list_ratio_avg[1][i])
+
 
     fig1 = plt.figure(1)
     r_patch = mpatches.Patch(color='red', label='all verified')
@@ -214,14 +228,20 @@ def print_results_2 (i):
     plt.close(fig1)
 
     fig2 = plt.figure(1)
-    r_patch = mpatches.Patch(color='red', label='to be verified')
-    g_patch = mpatches.Patch(color='green', label='already verified')
+    r_patch = mpatches.Patch(color='red', label='# to be verified')
+    g_patch = mpatches.Patch(color='green', label='# already verified')
+    k_patch = mpatches.Patch(color='black', label='avg # to be verified')
+    b_patch = mpatches.Patch(color='blue', label='avg # already verified')
     list_of_handles = []
     list_of_handles.append(r_patch)
     list_of_handles.append(g_patch)
+    list_of_handles.append(k_patch)
+    list_of_handles.append(b_patch)
     plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
     plt.plot(list_checkpoints, list_to_be_verified, 'r-', ms=1)
     plt.plot(list_checkpoints, list_already_verified, 'g-', ms=1)
+    plt.plot(list_checkpoints, list_to_be_verified_avg, 'k-', ms=1)
+    plt.plot(list_checkpoints, list_already_verified_avg, 'b-', ms=1)
     plt.xlabel('iteration')
     plt.ylabel('number of elements')
     plt.title('Spare verified numbers and numbers to be verified')
@@ -258,6 +278,38 @@ def print_results_2 (i):
     plt.savefig(file_output_fig4)
     plt.close(fig4)
 
+    fig5 = plt.figure(1)
+    b_patch = mpatches.Patch(color='blue', label='diff/# to be verified')
+    r_patch = mpatches.Patch(color='red', label='avg')
+    list_of_handles = []
+    list_of_handles.append(b_patch)
+    list_of_handles.append(r_patch)
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.plot(list_checkpoints, list_ratio[0], 'b-', ms=1)
+    plt.plot(list_checkpoints, list_ratio_avg[0], 'r-', ms=1)
+    plt.xlabel('iteration')
+    plt.ylabel('ratio')
+    plt.title('Ratio')
+    plt.grid(True)
+    plt.savefig(file_output_fig5)
+    plt.close(fig5)
+
+    fig6 = plt.figure(1)
+    g_patch = mpatches.Patch(color='green', label='diff/# already verified')
+    r_patch = mpatches.Patch(color='red', label='avg')
+    list_of_handles = []
+    list_of_handles.append(g_patch)
+    list_of_handles.append(r_patch)
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.plot(list_checkpoints, list_ratio[1], 'g-', ms=1)
+    plt.plot(list_checkpoints, list_ratio_avg[1], 'r-', ms=1)
+    plt.xlabel('iteration')
+    plt.ylabel('ratio')
+    plt.title('Ratio')
+    plt.grid(True)
+    plt.savefig(file_output_fig6)
+    plt.close(fig6)
+
 #############################################################
 # Main
 #############################################################
@@ -265,6 +317,7 @@ def print_results_2 (i):
 print ("Initialize objects...")
 p = primes.Primes(caching_primality_results)
 gp = goldbach.GoldbachPartition (p)
+dp = dataprocessing.DataProcessing()
 print ("DONE")
 print ("Loading helper sets...")
 p.init_set(file_input_primes, 1)
@@ -352,6 +405,18 @@ elif method == 2:
             print ("Verified all till max for iteration", k)
         list_to_be_verified.append(len(to_be_verified))
         list_already_verified.append(len(already_verified))
+        if len(to_be_verified) > 0:
+            list_ratio[0].append (diff_now/len(to_be_verified))
+        else:
+            list_ratio[0].append (0)
+        if len(already_verified) > 0:
+            list_ratio[1].append (diff_now/len(already_verified))
+        else:
+            list_ratio[1].append (0)
+        list_ratio_avg[0].append(dp.get_avg_value_from_list (list_ratio[0]))
+        list_ratio_avg[1].append(dp.get_avg_value_from_list (list_ratio[1]))
+        list_to_be_verified_avg.append(dp.get_avg_value_from_list(list_to_be_verified))
+        list_already_verified_avg.append(dp.get_avg_value_from_list(list_already_verified))
         
         k += 1
         diff_previous = diff_now

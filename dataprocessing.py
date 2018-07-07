@@ -74,12 +74,18 @@ class DataProcessing:
         return max_p / n * 100
 
     def get_perc_min_saturation_from_factors (self, n, factors):
-        min_p = self.get_min_factor (factors)
-        return min_p / n * 100
+        if n == 0:
+            return 0
+        else:
+            min_p = self.get_min_factor (factors)
+            return min_p / n * 100
 
     def get_perc_avg_saturation_from_factors (self, n, factors):
-        avg_p = self.get_avg_factor (factors)
-        return avg_p / n * 100
+        if n == 0:
+            return 0
+        else:
+            avg_p = self.get_avg_factor (factors)
+            return avg_p / n * 100
 
     def get_max_value_from_list (self, l):
         return max(l)
@@ -88,7 +94,10 @@ class DataProcessing:
         return min(l)
 
     def get_avg_value_from_list (self, l):
-        return (sum(l)/len(l))
+        if (len(l) > 0):
+            return (sum(l)/len(l))
+        else:
+            return 0
 
     def divide_list_into_chunks (self, r, size):
         out = []
