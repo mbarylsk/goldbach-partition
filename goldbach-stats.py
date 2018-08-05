@@ -54,13 +54,20 @@ caching_primality_results = False
 # Check basic stats
 check_regular = False
 # Check stats related to twin primes
-check_twins = True
+check_twins = False
 check_twins_extended = False
 
+# Check hypothesis related to n = p1 + p2
+# For every even n>=10
+#  if n= 6k then p1= 6x-1 and p2= 6y+1
+#  if n= 6k+2 then p1= 6x+1 and p2= 6y+1
+#  if n= 6k+4 then p1= 6x-1 and p2= 6y-1
+check_6kpm1_hypothesis = True
+
 min_num = 2
-max_num = 500000
+max_num = 1000000
 step_factor = 2
-checkpoint_value = 5000
+checkpoint_value = 1000
 big_prime_threshold = 100
 min_prime_count_threshold = 500
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
@@ -122,6 +129,7 @@ counter_zero_twin_lesser = 0
 counter_zero_twin_greater = 0
 list_zero_twin_lesser_count = []
 list_zero_twin_greater_count = []
+list_count_6kpm1 = []
 
 def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
@@ -273,6 +281,25 @@ def calculate_metrics (num, factors, dp, p):
             list_zero_twin_greater.append(num)
             counter_zero_twin_greater += 1
             list_zero_twin_greater_count.append(counter_zero_twin_greater)
+
+    if check_6kpm1_hypothesis:
+        count = 0
+        while True:
+            for (p1, p2) in factors:
+                if num % 6 == 0:
+                    if (p.is_6km1 (p1) and p.is_6kp1 (p2)) or (p.is_6km1 (p2) and p.is_6kp1 (p1)):
+                        count += 1
+                if num % 6 == 2:
+                    if (p.is_6kp1 (p1) and p.is_6kp1 (p2)):
+                        count += 1
+                if num % 6 == 4:
+                    if (p.is_6km1 (p1) and p.is_6km1 (p2)):
+                        count += 1
+
+            list_count_6kpm1.append(count)
+            if count == 0:
+                print ("Condition not met for", num)
+            break
 
 #############################################################
 # Presentation
@@ -551,6 +578,15 @@ def write_results_to_figures (directory, last_loop):
         plt.grid(True)
         plt.savefig(directory + "/f_ratio_twin_primes_to_all_primes.png")
 
+    if check_6kpm1_hypothesis:
+        plt.figure(21)
+        plt.plot(list_nums, list_count_6kpm1, 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Count of matching pairs')
+        plt.title('Hypothesis for 6k+-1')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6kpm1.png")
+
 #############################################################
 # Main - Phase 1
 # Preload files & restore previous calculations
@@ -567,7 +603,7 @@ p.init_set(file_input_primes, True)
 p.init_set(file_input_nonprimes, False)
 print ("DONE")
 print ("Sorting primes...")
-p.sort_prime_set()
+p.sort_primes_set()
 print ("DONE")
 print ("Output result folder: ", directory)
 print ("---------------------------------------------------")

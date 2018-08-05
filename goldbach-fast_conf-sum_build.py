@@ -80,6 +80,8 @@ file_output_fig3 = directory + "/f_sumbuild_diff_and_delta.png"
 file_output_fig4 = directory + "/f_sumbuild_diff.png"
 file_output_fig5 = directory + "/f_sumbuild_ratio_to_be_ver.png"
 file_output_fig6 = directory + "/f_sumbuild_ratio_alr_ver.png"
+file_output_fig7 = directory + "/f_sumbuild_ratio_to_be_ver_diff.png"
+file_output_fig8 = directory + "/f_sumbuild_ratio_alr_ver_diff.png"
 file_output_pickle = directory + "/objs_sym_primes.pickle"
 
 #############################################################
@@ -108,6 +110,7 @@ list_checkpoints =              []
 list_ratio =                    [[],[]]
 # [0] - average of list_ratio[0], [1] - average of list_ratio[1]
 list_ratio_avg =                [[],[]]
+list_ratio_avg_diff =           [[],[]]
 # http://oeis.org/A301776
 list_A301776 =                  [2]
 
@@ -433,3 +436,48 @@ k_current = max_num
 save_current_results(file_output_pickle)
 
 print ("Total calculations lasted:", dt_diff)
+
+threshold_max = 700
+threshold_min = 50
+neighbour = 20
+for x in range (1, k):
+    if (list_diff[0][x] > list_diff[0][x-neighbour] + threshold_max) and (list_diff[0][x] > list_diff[0][x+neighbour] + threshold_max) and list_diff[0][x] > 2000:
+        print ("MAX: k=", x, "previous=", list_diff[0][x-neighbour], "current=", list_diff[0][x], "next=", list_diff[0][x+neighbour])
+
+for x in range (0, k):
+    if list_diff[0][x] < threshold_min:
+        print ("MIN: k=", x, "current=", list_diff[0][x])
+
+list_ratio_avg_diff[0].append(0)
+list_ratio_avg_diff[1].append(0)
+for x in range (1, len(list_ratio_avg[0])):
+    list_ratio_avg_diff[0].append(list_ratio_avg[0][x-1] - list_ratio_avg[0][x])
+    list_ratio_avg_diff[1].append(list_ratio_avg[1][x-1] - list_ratio_avg[1][x])
+
+fig7 = plt.figure(1)
+b_patch = mpatches.Patch(color='blue', label='diff')
+list_of_handles = []
+list_of_handles.append(b_patch)
+plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+plt.plot(list_checkpoints, list_ratio_avg_diff[0], 'b-', ms=1)
+plt.xlabel('iteration')
+plt.ylabel('diff')
+plt.ylim(ymax = 0.02, ymin = -0.02)
+plt.title('Average diff')
+plt.grid(True)
+plt.savefig(file_output_fig7)
+plt.close(fig7)
+
+fig8 = plt.figure(1)
+g_patch = mpatches.Patch(color='green', label='diff')
+list_of_handles = []
+list_of_handles.append(g_patch)
+plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+plt.plot(list_checkpoints, list_ratio_avg_diff[1], 'g-', ms=1)
+plt.ylim(ymax = 0.001, ymin = -0.001)
+plt.xlabel('iteration')
+plt.ylabel('diff')
+plt.title('Average diff')
+plt.grid(True)
+plt.savefig(file_output_fig8)
+plt.close(fig8)
