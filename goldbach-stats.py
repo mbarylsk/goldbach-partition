@@ -67,7 +67,7 @@ check_6kpm1_hypothesis = True
 min_num = 2
 max_num = 1000000
 step_factor = 2
-checkpoint_value = 1000
+checkpoint_value = 10000
 big_prime_threshold = 100
 min_prime_count_threshold = 500
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
@@ -130,6 +130,7 @@ counter_zero_twin_greater = 0
 list_zero_twin_lesser_count = []
 list_zero_twin_greater_count = []
 list_count_6kpm1 = []
+list_count_6kpm1_ratio = []
 
 def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
@@ -297,6 +298,10 @@ def calculate_metrics (num, factors, dp, p):
                         count += 1
 
             list_count_6kpm1.append(count)
+            if (count > 0):
+                list_count_6kpm1_ratio.append(num_of_pairs/count)
+            else:
+                list_count_6kpm1_ratio.append(0)
             if count == 0:
                 print ("Condition not met for", num)
             break
@@ -586,6 +591,14 @@ def write_results_to_figures (directory, last_loop):
         plt.title('Hypothesis for 6k+-1')
         plt.grid(True)
         plt.savefig(directory + "/f_hypo_6kpm1.png")
+
+        plt.figure(22)
+        plt.plot(list_nums, list_count_6kpm1_ratio, 'b-', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Ratio')
+        plt.title('Ratio of GB pairs to pairs matching 6k+-1 hypothesis')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6kpm1_ratio.png")
 
 #############################################################
 # Main - Phase 1
