@@ -285,26 +285,25 @@ def calculate_metrics (num, factors, dp, p):
 
     if check_6kpm1_hypothesis:
         count = 0
-        while True:
+        if num > 8:
             for (p1, p2) in factors:
-                if num % 6 == 0:
+                if num/2 % 3 == 0:
                     if (p.is_6km1 (p1) and p.is_6kp1 (p2)) or (p.is_6km1 (p2) and p.is_6kp1 (p1)):
                         count += 1
-                if num % 6 == 2:
+                if num/2 % 3 == 1:
                     if (p.is_6kp1 (p1) and p.is_6kp1 (p2)):
                         count += 1
-                if num % 6 == 4:
+                if num/2 % 3 == 2:
                     if (p.is_6km1 (p1) and p.is_6km1 (p2)):
                         count += 1
 
-            list_count_6kpm1.append(count)
-            if (count > 0):
-                list_count_6kpm1_ratio.append(num_of_pairs/count)
-            else:
-                list_count_6kpm1_ratio.append(0)
-            if count == 0:
-                print ("Condition not met for", num)
-            break
+        list_count_6kpm1.append(count)
+        if (count > 0):
+            list_count_6kpm1_ratio.append(num_of_pairs/count)
+        else:
+            list_count_6kpm1_ratio.append(0)
+        if count == 0:
+            print ("WARNING: 6kpm1 Condition not met for", num)
 
 #############################################################
 # Presentation
