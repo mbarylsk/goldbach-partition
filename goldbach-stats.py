@@ -65,7 +65,7 @@ check_twins_extended = False
 check_6kpm1_hypothesis = True
 
 min_num = 2
-max_num = 1000000
+max_num = 2000000
 step_factor = 2
 checkpoint_value = 10000
 big_prime_threshold = 100
@@ -130,7 +130,9 @@ counter_zero_twin_greater = 0
 list_zero_twin_lesser_count = []
 list_zero_twin_greater_count = []
 list_count_6kpm1 = []
+list_count_6kpm1_nonmatch = []
 list_count_6kpm1_ratio = []
+list_count_6kpm1_perc = []
 
 def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
@@ -285,23 +287,19 @@ def calculate_metrics (num, factors, dp, p):
 
     if check_6kpm1_hypothesis:
         count = 0
-        if num > 8:
-            for (p1, p2) in factors:
-                if num/2 % 3 == 0:
-                    if (p.is_6km1 (p1) and p.is_6kp1 (p2)) or (p.is_6km1 (p2) and p.is_6kp1 (p1)):
-                        count += 1
-                if num/2 % 3 == 1:
-                    if (p.is_6kp1 (p1) and p.is_6kp1 (p2)):
-                        count += 1
-                if num/2 % 3 == 2:
-                    if (p.is_6km1 (p1) and p.is_6km1 (p2)):
-                        count += 1
+        for (p1, p2) in factors:
+            if gp.check_for_6kpm1_in_partition (p, num, p1, p2):
+                count += 1
 
         list_count_6kpm1.append(count)
+        diff_6kpm1 = num_of_pairs - count
+        list_count_6kpm1_nonmatch.append(diff_6kpm1)
         if (count > 0):
             list_count_6kpm1_ratio.append(num_of_pairs/count)
+            list_count_6kpm1_perc.append(int(100*count/num_of_pairs))
         else:
             list_count_6kpm1_ratio.append(0)
+            list_count_6kpm1_perc.append(0)
         if count == 0:
             print ("WARNING: 6kpm1 Condition not met for", num)
 
@@ -598,6 +596,22 @@ def write_results_to_figures (directory, last_loop):
         plt.title('Ratio of GB pairs to pairs matching 6k+-1 hypothesis')
         plt.grid(True)
         plt.savefig(directory + "/f_hypo_6kpm1_ratio.png")
+
+        plt.figure(23)
+        plt.plot(list_nums, list_count_6kpm1_nonmatch, 'r.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Ratio')
+        plt.title('Number of pairs non-matching 6k+-1 hypothesis')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6kpm1_nomatch.png")
+
+        plt.figure(24)
+        plt.plot(list_nums, list_count_6kpm1_perc, 'b-', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Ratio')
+        plt.title('Percent of GB pairs to pairs matching 6k+-1 hypothesis')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6kpm1_perc.png")
 
 #############################################################
 # Main - Phase 1
