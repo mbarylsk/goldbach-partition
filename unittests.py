@@ -163,6 +163,23 @@ class TestMethods(unittest.TestCase):
         self.assertEqual (p2, 11)
         self.assertEqual (iterations, 2)
 
+    def search_for_6kpm1_in_goldbach_neg(self):
+        p = primes.Primes(False)
+        gp = goldbach.GoldbachPartition (p)
+        p.sort_primes_set()
+        self.assertFalse (gp.check_for_6kpm1_in_partition (p, 4, 2, 2))
+        self.assertFalse (gp.check_for_6kpm1_in_partition (p, 6, 3, 3))
+        self.assertFalse (gp.check_for_6kpm1_in_partition (p, 8, 3, 5))
+        self.assertFalse (gp.check_for_6kpm1_in_partition (p, 14, 3, 11))
+
+    def search_for_6kpm1_in_goldbach(self):
+        p = primes.Primes(False)
+        gp = goldbach.GoldbachPartition (p)
+        p.sort_primes_set()
+        self.assertFalse (gp.check_for_6kpm1_in_partition (p, 10, 5, 5))
+        self.assertFalse (gp.check_for_6kpm1_in_partition (p, 12, 5, 7))
+        self.assertFalse (gp.check_for_6kpm1_in_partition (p, 14, 7, 7))
+
     def test_reduce_prime_for_goldbach_min(self):
         p = primes.Primes(False)
         gp = goldbach.GoldbachPartition (p)

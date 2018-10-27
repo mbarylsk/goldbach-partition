@@ -175,6 +175,24 @@ class GoldbachPartition:
         duration = time.time() - startTime
         return p1, p2, duration, iteration
 
+    # returns True if 6kpm1 hypothesis is fulfilled for num and its
+    # Goldbach Partition p1+p2:
+    # - if n mod 3 = 0, then GSC (2n, 6a-1, 6b+1)
+    # - if n mod 3 = 1, then GSC (2n, 6a+1, 6b+1)
+    # - if n mod 3 = 2, then GSC (2n, 6a-1, 6b-1)
+    # Otherwise returns False.
+    def check_for_6kpm1_in_partition (self, p, num, p1, p2):
+        if num/2 % 3 == 0:
+            if (p.is_6km1 (p1) and p.is_6kp1 (p2)) or (p.is_6km1 (p2) and p.is_6kp1 (p1)):
+                return True
+        elif num/2 % 3 == 1:
+            if (p.is_6kp1 (p1) and p.is_6kp1 (p2)):
+                return True
+        else:
+            if (p.is_6km1 (p1) and p.is_6km1 (p2)):
+                return True
+        return False
+
     def reduce_prime_for_goldbach (self, p, look_for_max):
         if look_for_max:
             n = int(math.log(p, 2))
