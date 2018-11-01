@@ -21,6 +21,7 @@ This framework is used to find the fastest computational confirmation method of 
 
 _goldbach-fast_conf-prim_check.py_ is examining 6 different approach which are based on iteration over even integers, decomposition to two integers and final primality check of both components.
 Search for GP is successful if both components are primes. _goldbach-fast_conf-prim_check-distr.py_ is a distributed version of this approach.
+_goldbach-fast_conf-twinprim_check.py_ is checking if even numbers of form 6n-2 are a sum of two lesser twin primes.
 
 ## Methods based on sum building from already known prime numbers
 
