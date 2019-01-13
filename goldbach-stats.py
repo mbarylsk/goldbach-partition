@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 - 2018, Marcin Barylski
+# Copyright (c) 2016 - 2019, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -753,23 +753,6 @@ p.init_set(file_input_nonprimes, False)
 print ("DONE")
 print ("Sorting primes...")
 p.sort_primes_set()
-print ("DONE")
-print ("Excluding primes from analysis...")
-p.add_to_primes_set_to_be_excluded(41)
-p.add_to_primes_set_to_be_excluded(43)
-p.add_to_primes_set_to_be_excluded(47)
-p.add_to_primes_set_to_be_excluded(59)
-p.add_to_primes_set_to_be_excluded(61)
-p.add_to_primes_set_to_be_excluded(71)
-p.add_to_primes_set_to_be_excluded(73)
-p.add_to_primes_set_to_be_excluded(79)
-p.add_to_primes_set_to_be_excluded(101)
-p.add_to_primes_set_to_be_excluded(103)
-p.add_to_primes_set_to_be_excluded(107)
-p.add_to_primes_set_to_be_excluded(137)
-p.add_to_primes_set_to_be_excluded(139)
-p.add_to_primes_set_to_be_excluded(179)
-p.add_to_primes_set_to_be_excluded(181)
 print ("DONE")
 print ("Output result folder: ", directory)
 print ("---------------------------------------------------")
