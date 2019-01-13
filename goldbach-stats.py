@@ -51,6 +51,8 @@ be_verbose = False
 #   o False - do not cache new primality test results
 caching_primality_results = False
 
+restore_previous_results = False
+
 # Check basic stats
 check_regular = False
 # Check stats related to twin primes
@@ -62,10 +64,10 @@ check_twins_extended = False
 #  if n= 6k then p1= 6x-1 and p2= 6y+1
 #  if n= 6k+2 then p1= 6x+1 and p2= 6y+1
 #  if n= 6k+4 then p1= 6x-1 and p2= 6y-1
-check_6kpm1_hypothesis = True
+check_6kpm1_hypothesis = False
 
 min_num = 2
-max_num = 2000000
+max_num = 200000
 step_factor = 2
 checkpoint_value = 10000
 big_prime_threshold = 100
@@ -104,6 +106,7 @@ list_min_diff_in_pairs_trend = []
 list_avg_diff_in_pairs_trend = []
 list_min_prime = []
 list_nums = []
+list_nums_6k = [[], [], []]
 list_checkpoints_duration = []
 list_checkpoints = []
 prev_max_diff = 0
@@ -133,6 +136,8 @@ list_count_6kpm1 = []
 list_count_6kpm1_nonmatch = []
 list_count_6kpm1_ratio = []
 list_count_6kpm1_perc = []
+list_count_6k = [[], [], [], [], [], []]
+list_count_6k_avg = [[], [], [], [], [], []]
 
 def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
@@ -140,6 +145,8 @@ def calculate_metrics (num, factors, dp, p):
 
     list_nums.append(num)
     num_of_pairs = dp.get_number_of_pairs (factors)
+    if num_of_pairs == 0:
+        print ("WARNING: GSC not met for", num)
 
     if check_regular:
         min_prime = dp.get_min_factor (factors)
@@ -287,21 +294,81 @@ def calculate_metrics (num, factors, dp, p):
 
     if check_6kpm1_hypothesis:
         count = 0
+        count_6km1 = 0
+        count_6kp1 = 0
+        count_6km1_both = 0
+        count_6kp1_both = 0
+        count_lesser_both = 0
+        count_lesser_6km1_both = 0
         for (p1, p2) in factors:
             if gp.check_for_6kpm1_in_partition (p, num, p1, p2):
                 count += 1
+            if p.is_6km1(p1):
+                count_6km1 += 1
+            if p.is_6km1(p2):
+                count_6km1 += 1
+            if p.is_6kp1(p1):
+                count_6kp1 += 1
+            if p.is_6kp1(p2):
+                count_6kp1 += 1
+            if p.is_6km1(p1) and p.is_6km1(p2):
+                count_6km1_both += 1
+            if p.is_6kp1(p1) and p.is_6kp1(p2):
+                count_6kp1_both += 1
+            if p.is_lesser_twin_prime(p1) and p.is_lesser_twin_prime(p2):
+                count_lesser_both += 1
+            if p.is_lesser_twin_prime(p1) and p.is_lesser_twin_prime(p2) and p.is_6km1(p1) and p.is_6km1(p2):
+                count_lesser_6km1_both += 1 
 
         list_count_6kpm1.append(count)
         diff_6kpm1 = num_of_pairs - count
         list_count_6kpm1_nonmatch.append(diff_6kpm1)
-        if (count > 0):
+        if count > 0:
             list_count_6kpm1_ratio.append(num_of_pairs/count)
             list_count_6kpm1_perc.append(int(100*count/num_of_pairs))
         else:
             list_count_6kpm1_ratio.append(0)
             list_count_6kpm1_perc.append(0)
+        list_count_6k[0].append(count_6km1 - count_6kp1)
+        list_count_6k[1].append(count_6km1_both - count_6kp1_both)
+            
         if count == 0:
             print ("WARNING: 6kpm1 Condition not met for", num)
+
+        if count_6km1 - count_6kp1 == 0:
+            #print ("INFO: # 6km1 = # 6kp1", count_6km1, "for", num)
+            if num % 6 != 0:
+                print ("WARNING: # 6km1 = # 6kp1 for", num, "(", count_6km1, ") but num % 6 = ", num % 6)
+
+        if count_6km1_both - count_6kp1_both == 0:
+            #print ("INFO: # 6km1_both = # 6kp1_both", count_6km1_both, "for", num)
+            if num % 6 != 0:
+                print ("WARNING: # 6km1_both = # 6kp1_both for", num, "(", count_6km1_both, ") but num % 6 = ", num % 6)
+
+        if num % 6 == 0:
+            list_nums_6k[0].append(num)
+            list_count_6k[2].append(count_6km1)
+            #if count_6km1 < 2:
+            #    print ("WARNING: count_6km1=", count_6km1, "for", num)
+
+        if num % 6 == 2:
+            list_nums_6k[1].append(num)
+            list_count_6k[3].append(count_lesser_both)
+            #if count_6km1 < 2:
+            #    print ("WARNING: count_6km1=", count_lesser_both, "for", num)
+
+        if num % 6 == 4:
+            list_nums_6k[2].append(num)
+            list_count_6k[4].append(count_lesser_both)
+            list_count_6k_avg[4].append(dp.get_avg_value_from_list(list_count_6k[4]))
+            list_count_6k[5].append(count_lesser_6km1_both)
+            list_count_6k_avg[5].append(dp.get_avg_value_from_list(list_count_6k[5]))
+            if count_lesser_both < 2:
+                print ("WARNING: count_lesser_both=", count_lesser_both, "for", num)
+            if count_lesser_6km1_both == 0:
+                print ("WARNING: count_lesser_6km1_both=", count_lesser_6km1_both, "for", num)
+            if count_lesser_6km1_both != count_lesser_both:
+                print ("WARNING: count_lesser_6km1_both != count_lesser_both", count_lesser_6km1_both, count_lesser_both, "for", num)
 
 #############################################################
 # Presentation
@@ -613,6 +680,62 @@ def write_results_to_figures (directory, last_loop):
         plt.grid(True)
         plt.savefig(directory + "/f_hypo_6kpm1_perc.png")
 
+        plt.figure(25)
+        plt.plot(list_nums, list_count_6k[0], 'r.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Diff')
+        plt.title('6k+-1 primes in GB pairs - diff1 - 6km1-6kp1')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6kpm1_count1.png")
+
+        plt.figure(26)
+        plt.plot(list_nums, list_count_6k[1], 'g.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Diff')
+        plt.title('6k+-1 primes in GB pairs - diff2 - 6km1-6kp1 (both)')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6kpm1_count2.png")
+
+        plt.figure(27)
+        plt.plot(list_nums_6k[0], list_count_6k[2], 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('6k-1 count for 6n')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6km1_in_6n.png")
+
+        plt.figure(28)
+        plt.plot(list_nums_6k[1], list_count_6k[3], 'b.', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('n % 6 = 2 and both the lesser of twin primes')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6km1_in_6n_2.png")
+
+        plt.figure(29)
+        plt.plot(list_nums_6k[2], list_count_6k[4], 'b.', ms=1)
+        plt.plot(list_nums_6k[2], list_count_6k_avg[4], 'r.', ms=1)
+        blue_patch = mpatches.Patch(color='blue', label='sum')
+        red_patch = mpatches.Patch(color='red', label='avg')
+        plt.legend(handles=[red_patch, blue_patch])
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('n % 6 = 4 and both the lesser of twin primes')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6km1_in_6n_4.png")
+
+        plt.figure(30)
+        plt.plot(list_nums_6k[2], list_count_6k[5], 'b.', ms=1)
+        plt.plot(list_nums_6k[2], list_count_6k_avg[5], 'r.', ms=1)
+        blue_patch = mpatches.Patch(color='blue', label='sum')
+        red_patch = mpatches.Patch(color='red', label='avg')
+        plt.legend(handles=[red_patch, blue_patch])
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('n % 6 = 4 and both the lesser of twin primes of form 6k-1')
+        plt.grid(True)
+        plt.savefig(directory + "/f_hypo_6km1_in_6n_4_6km1.png")
+
 #############################################################
 # Main - Phase 1
 # Preload files & restore previous calculations
@@ -631,10 +754,27 @@ print ("DONE")
 print ("Sorting primes...")
 p.sort_primes_set()
 print ("DONE")
+print ("Excluding primes from analysis...")
+p.add_to_primes_set_to_be_excluded(41)
+p.add_to_primes_set_to_be_excluded(43)
+p.add_to_primes_set_to_be_excluded(47)
+p.add_to_primes_set_to_be_excluded(59)
+p.add_to_primes_set_to_be_excluded(61)
+p.add_to_primes_set_to_be_excluded(71)
+p.add_to_primes_set_to_be_excluded(73)
+p.add_to_primes_set_to_be_excluded(79)
+p.add_to_primes_set_to_be_excluded(101)
+p.add_to_primes_set_to_be_excluded(103)
+p.add_to_primes_set_to_be_excluded(107)
+p.add_to_primes_set_to_be_excluded(137)
+p.add_to_primes_set_to_be_excluded(139)
+p.add_to_primes_set_to_be_excluded(179)
+p.add_to_primes_set_to_be_excluded(181)
+print ("DONE")
 print ("Output result folder: ", directory)
 print ("---------------------------------------------------")
 
-if os.path.exists(file_input_oldpairs):
+if os.path.exists(file_input_oldpairs) and restore_previous_results:
     print ("Restoration of previous calculations started ...")
     
     num_from_file = read_results_from_file (file_input_oldpairs, dp, p)
