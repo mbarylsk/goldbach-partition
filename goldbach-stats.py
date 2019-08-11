@@ -53,18 +53,18 @@ caching_primality_results = False
 
 restore_previous_results = False
 
-# Check basic stats
+# 1. Check basic stats
 check_regular = False
-# Check stats related to twin primes
+
+# 2. Check stats related to twin primes
 check_twins = False
 check_twins_extended = False
 
-# Check hypothesis related to n = p1 + p2
-# For every even n>=10
+# 3. Check hypothesis related to n = p1 + p2. For every even n>=10:
 #  if n= 6k then p1= 6x-1 and p2= 6y+1
 #  if n= 6k+2 then p1= 6x+1 and p2= 6y+1
 #  if n= 6k+4 then p1= 6x-1 and p2= 6y-1
-check_6kpm1_hypothesis = False
+check_6kpm1_hypothesis = True
 
 min_num = 2
 max_num = 200000
@@ -137,6 +137,8 @@ list_count_6kpm1_nonmatch = []
 list_count_6kpm1_ratio = []
 list_count_6kpm1_perc = []
 list_count_6k = [[], [], [], [], [], []]
+list_count_6k_ratio = [[], [], [], [], [], []]
+list_count_6k_ratio_avg = [[], [], [], [], [], []]
 list_count_6k_avg = [[], [], [], [], [], []]
 
 def calculate_metrics (num, factors, dp, p):
@@ -360,6 +362,8 @@ def calculate_metrics (num, factors, dp, p):
         if num % 6 == 4:
             list_nums_6k[2].append(num)
             list_count_6k[4].append(count_lesser_both)
+            list_count_6k_ratio[4].append (count_lesser_both/num_of_pairs)
+            list_count_6k_ratio_avg[4].append (dp.get_avg_value_from_list(list_count_6k_ratio[4]))
             list_count_6k_avg[4].append(dp.get_avg_value_from_list(list_count_6k[4]))
             list_count_6k[5].append(count_lesser_6km1_both)
             list_count_6k_avg[5].append(dp.get_avg_value_from_list(list_count_6k[5]))
@@ -735,6 +739,18 @@ def write_results_to_figures (directory, last_loop):
         plt.title('n % 6 = 4 and both the lesser of twin primes of form 6k-1')
         plt.grid(True)
         plt.savefig(directory + "/f_hypo_6km1_in_6n_4_6km1.png")
+
+        plt.figure(31)
+        plt.plot(list_nums_6k[2], list_count_6k_ratio[4], 'b.', ms=1)
+        plt.plot(list_nums_6k[2], list_count_6k_ratio_avg[4], 'r.', ms=1)
+        blue_patch = mpatches.Patch(color='blue', label='ratio')
+        red_patch = mpatches.Patch(color='red', label='avg')
+        plt.legend(handles=[red_patch, blue_patch])
+        plt.xlabel('n')
+        plt.ylabel('Count')
+        plt.title('n % 6 = 4 - ratio GPs with the lesser only to all GPs')
+        plt.grid(True)
+        plt.savefig(directory + "/f_lesser_to_all.png")
 
 #############################################################
 # Main - Phase 1
