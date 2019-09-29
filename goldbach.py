@@ -48,6 +48,9 @@ class GoldbachPartition:
 
     def set_number (self, n):
         self.number = n
+
+    def add_to_primes_set_to_be_excluded (self, p1):
+        self.primes.add_to_primes_set_to_be_excluded(p1)
     
     def delta_constant_plus_2 (self, iteration):
         return 2
