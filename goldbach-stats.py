@@ -29,12 +29,14 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.mlab as mlab
+import matplotlib.ticker as ticker
 import numpy as np
 import os
 from datetime import datetime
 import goldbach
 sys.path.insert(0, '..\\primes\\')
 import primes
+import collections
 import dataprocessing
 
 #############################################################
@@ -54,7 +56,7 @@ caching_primality_results = False
 restore_previous_results = False
 
 # 1. Check basic stats
-check_regular = False
+check_regular = True
 
 # 2. Check stats related to twin primes
 check_twins = False
@@ -64,7 +66,10 @@ check_twins_extended = False
 #  if n= 6k then p1= 6x-1 and p2= 6y+1
 #  if n= 6k+2 then p1= 6x+1 and p2= 6y+1
 #  if n= 6k+4 then p1= 6x-1 and p2= 6y-1
-check_6kpm1_hypothesis = True
+check_6kpm1_hypothesis = False
+
+# 4. Chec middle primes in GP
+check_middle = False
 
 min_num = 2
 max_num = 200000
@@ -100,6 +105,7 @@ list_avg_sats = []
 list_num_distinct_pairs = []
 list_max_diff_in_pairs = []
 list_min_diff_in_pairs = []
+list_min_diff_in_pairs_freq = collections.OrderedDict()
 list_avg_diff_in_pairs = []
 list_max_diff_in_pairs_trend = []
 list_min_diff_in_pairs_trend = []
@@ -140,6 +146,7 @@ list_count_6k = [[], [], [], [], [], []]
 list_count_6k_ratio = [[], [], [], [], [], []]
 list_count_6k_ratio_avg = [[], [], [], [], [], []]
 list_count_6k_avg = [[], [], [], [], [], []]
+list_mid_ratio = [[]]
 
 def calculate_metrics (num, factors, dp, p):
     global prev_max_diff, max_diff_trend_factor, prev_min_diff, min_diff_trend_factor, prev_avg_diff, avg_diff_trend_factor, min_prime
@@ -195,6 +202,18 @@ def calculate_metrics (num, factors, dp, p):
         elif prev_max_diff < avg_diff:
             avg_diff_trend_factor = avg_diff_trend_factor + 1
         list_avg_diff_in_pairs_trend.append(avg_diff_trend_factor)
+
+        # frequency of smallest diffs
+        if min_diff in list_min_diff_in_pairs_freq:
+            list_min_diff_in_pairs_freq[min_diff] = list_min_diff_in_pairs_freq[min_diff] + 1
+        else:
+            max_k = 0
+            for k, v in list_min_diff_in_pairs_freq.items():
+                if k > max_k:
+                    max_k = k
+            for i in range (max_k, min_diff, 2):
+                list_min_diff_in_pairs_freq[i] = 0
+            list_min_diff_in_pairs_freq[min_diff] = 1
 
         prev_max_diff = max_diff
         prev_min_diff = min_diff
@@ -374,6 +393,10 @@ def calculate_metrics (num, factors, dp, p):
             if count_lesser_6km1_both != count_lesser_both:
                 print ("WARNING: count_lesser_6km1_both != count_lesser_both", count_lesser_6km1_both, count_lesser_both, "for", num)
 
+    if check_middle:
+        max_ratio = dp.get_max_ratio_in_factors(factors)
+        list_mid_ratio[0].append (max_ratio)
+
 #############################################################
 # Presentation
 #############################################################
@@ -546,6 +569,15 @@ def write_results_to_figures (directory, last_loop):
         plt.title('Frequency of minimum primes in Goldbach partition')
         plt.grid(True)
         plt.savefig(directory + "/f_min_prime_in_sum_histogram.png")
+        
+        fig = plt.figure(33)
+        plt.clf()
+        plt.yscale('log')
+        plt.bar(list(list_min_diff_in_pairs_freq.keys()), list_min_diff_in_pairs_freq.values(), color='g')
+        plt.xlabel('Gap')
+        plt.ylabel('log(Apperances)')
+        plt.savefig(directory + "/f_diff_in_middle_primes_freq.png")
+        plt.close(fig)
 
     if check_twins_extended:
         plt.figure(10)
@@ -751,6 +783,15 @@ def write_results_to_figures (directory, last_loop):
         plt.title('n % 6 = 4 - ratio GPs with the lesser only to all GPs')
         plt.grid(True)
         plt.savefig(directory + "/f_lesser_to_all.png")
+
+    if check_middle:
+        plt.figure(32)
+        plt.plot(list_nums, list_mid_ratio[0], 'b-', ms=1)
+        plt.xlabel('n')
+        plt.ylabel('Ratio')
+        plt.title('Ratio of two biggest primes in GP')
+        plt.grid(True)
+        plt.savefig(directory + "/f_ratio_two_biggest_primes.png")
 
 #############################################################
 # Main - Phase 1
