@@ -44,7 +44,7 @@ min_num = 7
 step_factor = 2
 # Maximum even number checked against Goldbach conjecture
 #   o number = max_num * step_factor
-max_num = 20000000
+max_num = 200000
 
 # Searching for max reduction
 #   o True  - maximum 2^n
