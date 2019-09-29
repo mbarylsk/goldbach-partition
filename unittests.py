@@ -214,6 +214,14 @@ class TestMethods(unittest.TestCase):
         self.assertEqual (q, 3)
         self.assertTrue (res)
 
+    def test_dictionary_cleanup(self):
+        dp = dataprocessing.DataProcessing ()
+        d = {0:2, 6:1, 2:3}
+        print (d)
+        res = dp.dictionary_cleanup(d)
+        self.assertEqual(len(res), 4)
+        print (res)
+
     def test_divide(self):
         dp = dataprocessing.DataProcessing ()
         res = dp.divide_list_into_chunks(range(10), 5)
@@ -240,6 +248,12 @@ class TestMethods(unittest.TestCase):
         self.assertEqual(dp.get_avg_factor([(5,3)]), 4)
         self.assertEqual(dp.get_avg_factor([(3,3)]), 3)
         self.assertEqual(dp.get_avg_factor([(7,5),(2,11)]), 6.25)
+
+    def test_get_max_ratio_in_factors(self):
+        dp = dataprocessing.DataProcessing ()
+        self.assertEqual(dp.get_max_ratio_in_factors([(3,5)]), 0.6)
+        self.assertEqual(dp.get_max_ratio_in_factors([(3,7), (5,5)]), 1)
+        self.assertEqual(dp.get_max_ratio_in_factors([(5,5), (3,7)]), 1)
 
     def test_get_perc_max_saturation_from_factors(self):
         dp = dataprocessing.DataProcessing ()
