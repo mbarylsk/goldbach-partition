@@ -53,7 +53,7 @@ caching_primality_results = False
 
 min_num_def = 2
 min_num = min_num_def
-max_num_def = 10000
+max_num_def = 1000
 max_num = max_num_def
 step_factor = 2
 checkpoint_value = 100
@@ -72,123 +72,30 @@ if not os.path.exists(directory):
 # Business logic
 #############################################################
 
-list_primes = []
-list_primes_nom = []
-list_primes_den = []
-list_primes_factor_perc = []
+list_of_sets_required_factors = [{2}]
+temp_list_of_sets_required_factors = []
 
-def update_data (p, nominator, denominator):
-    global list_primes, list_primes_nom, list_primes_den
-    index = 0
-    found = False
-    for q in list_primes:
-        if q == p:
-            list_primes_nom[index] = nominator
-            list_primes_den[index] = denominator
-            found = True
-            break
-        index += 1
-    if not found:
-        list_primes.append(p)
-        list_primes_nom.append(nominator)
-        list_primes_den.append(denominator)
+list_nums = []
+list_no_of_required_factors = []
+list_no_of_primes = []
+list_no_of_primes_half = []
+list_no_of_sets_required_factors = []
 
-def set_prime_as_confimed (p):
-    update_data (p, 1, 1)
+def update_metrics (p, num):
 
-def get_data (p):
-    index = 0
-    for q in list_primes:
-        if q == p:
-            return (list_primes_nom[index], list_primes_den[index])
-            break
-        index += 1
-    return (0, 0)
+    list_nums.append (num)
 
-def is_prime_confirmed (p):
-    index = 0
-    for q in list_primes:
-        if q == p:
-            if list_primes_nom[index] == 1 and list_primes_den[index] == 1:
-                return True
-            else:
-                return False
-        index += 1
-    # not found - also return false
-    return False
+    min_lenght = sys.maxsize
+    for set_required_factors in list_of_sets_required_factors:
+        if len(set_required_factors) < min_lenght:
+            min_lenght = len(set_required_factors)
 
-def clear_not_confirmed_primes ():
-    index = 0
-    for p in list_primes:
-        if not is_prime_confirmed (p):
-            list_primes_nom[index] = 0
-            list_primes_den[index] = 0
-        index += 1
+    no_primes = p.get_all_primes_leq(num)
+    list_no_of_primes_half.append (math.ceil( no_primes / 2))
+    list_no_of_primes.append(no_primes)
+    list_no_of_required_factors.append (min_lenght)
 
-def update_metrics ():
-    index = 0
-    list_primes_factor_perc.clear()
-    for p in list_primes:
-        if list_primes_den[index] > 0:
-            list_primes_factor_perc.append (list_primes_nom[index]/list_primes_den[index])
-        else:
-            list_primes_factor_perc.append (0)
-        index += 1
-
-def print_candidates (threshold):
-    index = 0
-    for p in list_primes:
-        if list_primes_factor_perc[index] > threshold:
-            print ("Prime", p, "has value:", list_primes_factor_perc[index])
-        index += 1
-
-# returns True if new msut have primes found - this means that calculations must be restarted
-def calculate_metrics (num, factors, dp, p):
-
-    found = False
-    no_of_partitions = dp.get_number_of_pairs (factors)
-    
-    if no_of_partitions == 1:
-        for (p1, p2) in factors:
-            if is_prime_confirmed (p1) and is_prime_confirmed (p2):
-                found = True
-                if be_verbose:
-                    print ("Number", num, " Primes:", p1, "and", p2, "were already present as required.")
-                return False
-            else:
-                set_prime_as_confimed (p1)
-                set_prime_as_confimed (p2)
-                found = True
-                if be_verbose:
-                    print ("Number", num, " Primes:", p1, "and", p2, "were added as required.")
-                return True
-    else:
-        for (p1, p2) in factors:
-            if is_prime_confirmed (p1) and is_prime_confirmed (p2):
-                found = True
-                if be_verbose:
-                    print ("Number", num, " Primes:", p1, "and", p2, "are already confirmed as required.")
-                break
-    if not found:
-        for (p1, p2) in factors:
-            (n1, d1) = get_data (p1)
-            (n2, d2) = get_data (p2)
-            if not is_prime_confirmed (p1):
-                update_data (p1, n1 + 1, d1 + no_of_partitions)
-                if be_verbose:
-                    print ("Number", num, " Prime:", p1, "will have nom=", n1 + 1, "den=", d1 + no_of_partitions)
-            if not is_prime_confirmed (p2):
-                update_data (p2, n2 + 1, d2 + no_of_partitions)
-                if be_verbose:
-                    print ("Number", num, " Prime:", p2, "will have nom=", n2 + 1, "den=", d2 + no_of_partitions)
-
-    if be_verbose:   
-        print (list_primes)
-        print (list_primes_nom)
-        print (list_primes_den)
-        print ("END")
-
-    return False
+    list_no_of_sets_required_factors.append (len(list_of_sets_required_factors))
 
 #############################################################
 # Presentation
@@ -197,12 +104,30 @@ def calculate_metrics (num, factors, dp, p):
 def write_results_to_figures (directory):
 
     plt.figure(1)
-    plt.plot(list_primes, list_primes_factor_perc, 'b.', ms=2)
-    plt.xlabel('Prime')
-    plt.ylabel('Factor [%]')
-    plt.title('Factor for primes - is it required for GSC?')
+    r_patch = mpatches.Patch(color='red', label='ceil (# of primes / 2)')
+    g_patch = mpatches.Patch(color='green', label='# of primes')
+    b_patch = mpatches.Patch(color='blue', label='# of req primes')
+    list_of_handles = []
+    list_of_handles.append(g_patch)
+    list_of_handles.append(r_patch)
+    list_of_handles.append(b_patch)
+    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.4, 0.8))
+    plt.plot(list_nums, list_no_of_primes, 'g.', ms=2)
+    plt.plot(list_nums, list_no_of_primes_half, 'r.', ms=2)
+    plt.plot(list_nums, list_no_of_required_factors, 'b.', ms=2)
+    plt.xlabel('n')
+    plt.ylabel('Count')
+    plt.title('How big are the sets?')
     plt.grid(True)
     plt.savefig(directory + "/f_required_primes.png")
+
+    plt.figure(2)
+    plt.plot(list_nums, list_no_of_sets_required_factors, 'b.', ms=2)
+    plt.xlabel('n')
+    plt.ylabel('Count')
+    plt.title('How many sets?')
+    plt.grid(True)
+    plt.savefig(directory + "/f_number_of_possible_sets.png")
 
 #############################################################
 # Main - Phase 1
@@ -233,54 +158,104 @@ print ("---------------------------------------------------")
 dt_start = datetime.now()
 dt_current_previous = dt_start
 
-completed_all = False
-need_to_restart = True
+for k in range (min_num, max_num_def):
+    num = step_factor*k
 
-while not completed_all:
-
-    print ("---------------------------")
-    print ("New calcuations started ...")
-    print ("Current must-have primes:", list_primes)
-    if need_to_restart:
-        min_num = min_num_def
-        clear_not_confirmed_primes ()
-        need_to_restart = False
-
-    for k in range (min_num, max_num_def):
-        num = step_factor*k
+    if be_verbose:
+        print ("=============")
+        print ("num=", num)
     
-        factors = gp.find_sum_of_prime_numbers (num)
+    factors = gp.find_sum_of_prime_numbers (num)
+    if be_verbose:
+        print ("current factors:", factors)
 
-        if calculate_metrics (num, factors, dp, p):
-            print ("Need to restart because new must-have prime found ...")
-            need_to_restart = True
-            break
+    # step 1:
+    # check #1: maybe set_required_factors already contains required factors?
+    fullfiled = False
+    for pair in factors:
+        (p1, p2) = pair
+        for set_required_factors in list_of_sets_required_factors:
+            if p1 in set_required_factors and p2 in set_required_factors:
+                fullfiled = True
+                if be_verbose:
+                    print ("num=", num, "is fullfiled")
+                    print (list_of_sets_required_factors)
 
-    # checkpoint - partial results
-    if num % checkpoint_value == 0:
-        dt_current = datetime.now()
-        dt_diff_current = (dt_current - dt_current_previous).total_seconds()
-        list_checkpoints.append(num)
-        list_checkpoints_duration.append(dt_diff_current)
+    # check #2: p1 or p2 is not on a set_required_factors
+    if not fullfiled:
 
-        update_metrics ()
-        write_results_to_figures (directory)
+        if be_verbose:
+            print ("not fullfiled")
         
-        print ("Iteration", k, "of total", max_num, "took", dt_diff_current, "seconds")
+        for pair in factors:
+            (p1, p2) = pair
+            for set_required_factors in list_of_sets_required_factors:
+                if p1 in set_required_factors and p2 not in set_required_factors:
+                    temp_set = set_required_factors.copy()
+                    temp_set.add (p2)
+                    if be_verbose:
+                        print ("1", temp_set)
+                    temp_list_of_sets_required_factors.append (temp_set)
 
-    if num > max_num_def - 1:
-        completed_all = True
+        for pair in factors:
+            for set_required_factors in list_of_sets_required_factors:
+                if p1 not in set_required_factors and p2 in set_required_factors:
+                    temp_set = set_required_factors.copy()
+                    temp_set.add (p1)
+                    if be_verbose:
+                        print ("2", temp_set)
+                    temp_list_of_sets_required_factors.append (temp_set)
+
+        for pair in factors:
+            for set_required_factors in list_of_sets_required_factors:
+                if p1 not in set_required_factors and p2 not in set_required_factors:
+                    temp_set = set_required_factors.copy()
+                    temp_set.add (p1)
+                    temp_set.add (p2)
+                    if be_verbose:
+                        print ("3", temp_set)
+                    temp_list_of_sets_required_factors.append (temp_set)
+    else:
+        for set_required_factors in list_of_sets_required_factors:
+            condition_met = False
+            for pair in factors:
+                (p1, p2) = pair
+                if p1 in set_required_factors and p2 in set_required_factors:
+                    condition_met = True
+
+            if not condition_met:
+                list_of_sets_required_factors.remove (set_required_factors)
+                if be_verbose:
+                    print ("Removed", set_required_factors, "from list_of_sets_required_factors")
+                    print ("Now list_of_sets_required_factors", list_of_sets_required_factors)
+
+    # step 2: cleanup of set_temp_list_required_factors
+    if len(temp_list_of_sets_required_factors) > 0:
+        min_lenght = sys.maxsize
+        for temp_set_required_factors in temp_list_of_sets_required_factors:
+            if be_verbose:
+                print (temp_set_required_factors)
+            if len(temp_set_required_factors) < min_lenght:
+                min_lenght = len(temp_set_required_factors)
+
+        list_of_sets_required_factors = []
+        for temp_set_required_factors in temp_list_of_sets_required_factors:
+            if len(temp_set_required_factors) == min_lenght:
+                list_of_sets_required_factors.append (temp_set_required_factors)
+
+        temp_list_of_sets_required_factors = []
+
+    update_metrics (p, num)
+
+    if be_verbose:
+        print ("final result - currently required factors", list_of_sets_required_factors)
 
 dt_end = datetime.now()
-
-update_metrics ()
 write_results_to_figures (directory)
-print (list_primes)
-print (list_primes_nom)
-print (list_primes_den)
-
-print_candidates (0.3)
 
 # final results
 dt_diff = dt_end - dt_start
 print ("Total calculations lasted:", dt_diff)
+
+print ("Max examined number", num)
+print ("final result - currently required factors", list_of_sets_required_factors)
