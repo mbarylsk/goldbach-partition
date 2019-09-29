@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 - 2017, Marcin Barylski
+# Copyright (c) 2016 - 2019, Marcin Barylski
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -66,6 +66,25 @@ class DataProcessing:
                 minv = p2
         return minv
 
+    def get_unique_factors (self, factors):
+        uf = []
+        for pair in factors:
+            (p1, p2) = pair
+            if p1 not in uf:
+                uf.append (p1)
+            if p1 not in uf:
+                uf.append (p2)
+        return uf
+
+    def get_max_ratio_in_factors (self, factors):
+        maxr = 0
+        for pair in factors:
+            (p1, p2) = pair
+            ratio = p1 / p2
+            if ratio <=1 and ratio > maxr:
+                maxr = ratio
+        return maxr
+
     def get_number_of_pairs (self, factors):
         return len(factors)
 
@@ -98,6 +117,19 @@ class DataProcessing:
             return (sum(l)/len(l))
         else:
             return 0
+
+    def dictionary_cleanup (self, d):
+        max_x = 0
+        for x, y in d.items():
+            if x > max_x:
+                max_x = x
+        new_l = []
+        for z in range (0, max_x+1, 2):
+            if z in d:
+                new_l.append (d[z])
+            else:
+                new_l.append (0)
+        return new_l
 
     def divide_list_into_chunks (self, r, size):
         out = []
