@@ -54,7 +54,7 @@ caching_primality_results = False
 min_num = 2
 max_num = 12500
 step_factor = 2
-checkpoint_value = 500
+checkpoint_value = 2500
 file_input_primes = '..\\primes\\t_prime_numbers.txt'
 file_input_nonprimes = '..\\primes\\t_nonprime_numbers.txt'
 
@@ -81,6 +81,8 @@ list_of_eliminated_primes = []
 list_no_of_eliminated_primes = []
 list_no_of_eliminated_primes_to_no_of_partitions = []
 list_no_of_eliminated_primes_to_no_of_partitions_avg = []
+list_no_of_eliminated_primes_to_no_of_req_primes = []
+list_no_of_eliminated_primes_to_no_of_req_primes_avg = []
 
 list_nums = []
 list_no_of_required_factors = []
@@ -125,6 +127,9 @@ def update_metrics (p, dp, num, factors):
 
     list_no_of_eliminated_primes_to_no_of_partitions.append(len(list_of_eliminated_primes)/dp.get_number_of_pairs (factors))
     list_no_of_eliminated_primes_to_no_of_partitions_avg.append(dp.get_avg_value_from_list (list_no_of_eliminated_primes_to_no_of_partitions))
+
+    list_no_of_eliminated_primes_to_no_of_req_primes.append(len(list_of_eliminated_primes)/min_lenght)
+    list_no_of_eliminated_primes_to_no_of_req_primes_avg.append(dp.get_avg_value_from_list (list_no_of_eliminated_primes_to_no_of_req_primes))
 
 #############################################################
 # Presentation
@@ -182,6 +187,18 @@ def write_results_to_figures (directory):
     plt.title('How many eliminated primes to partitions?')
     plt.grid(True)
     plt.savefig(directory + "/f_eliminated_primes_to_partitions.png")
+
+    plt.figure(5)
+    blue_patch = mpatches.Patch(color='blue', label='ratio')
+    red_patch = mpatches.Patch(color='red', label='avg')
+    plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.9, 0.9))
+    plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_req_primes, 'b-', ms=1)
+    plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_req_primes_avg, 'r-', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('Ratio')
+    plt.title('How many eliminated primes to required primes?')
+    plt.grid(True)
+    plt.savefig(directory + "/f_eliminated_primes_to_req_primes.png")
 
 def write_results_to_files (directory):
     global file_output_list_of_eliminated_primes, file_output_list_of_primes_in_partitions, file_output_list_of_sets_required_factors
