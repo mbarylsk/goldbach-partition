@@ -83,6 +83,7 @@ list_no_of_eliminated_primes_to_no_of_partitions = []
 list_no_of_eliminated_primes_to_no_of_partitions_avg = []
 list_no_of_eliminated_primes_to_no_of_req_primes = []
 list_no_of_eliminated_primes_to_no_of_req_primes_avg = []
+list_percentages = [[],[]]
 
 list_nums = []
 list_no_of_required_factors = []
@@ -131,6 +132,13 @@ def update_metrics (p, dp, num, factors):
     list_no_of_eliminated_primes_to_no_of_req_primes.append(len(list_of_eliminated_primes)/min_lenght)
     list_no_of_eliminated_primes_to_no_of_req_primes_avg.append(dp.get_avg_value_from_list (list_no_of_eliminated_primes_to_no_of_req_primes))
 
+    if no_primes > 0:
+        list_percentages[0].append (int(len(list_of_eliminated_primes)/no_primes*100))
+        list_percentages[1].append (int(min_lenght/no_primes*100))
+    else:
+        list_percentages[0].append (0)
+        list_percentages[1].append (0)
+
 #############################################################
 # Presentation
 #############################################################
@@ -149,7 +157,7 @@ def write_results_to_figures (directory):
     list_of_handles.append(r_patch)
     list_of_handles.append(m_patch)
     list_of_handles.append(b_patch)
-    plt.legend(handles=list_of_handles, loc='upper right', bbox_to_anchor=(0.5, 0.8))
+    plt.legend(handles=list_of_handles, loc='upper left', prop={'size': 6})
     plt.plot(list_nums, list_no_of_primes, 'g.', ms=2)
     plt.plot(list_nums, list_no_of_primes_half, 'r.', ms=2)
     plt.plot(list_nums, list_no_of_primes_half_n, 'm.', ms=2)
@@ -179,8 +187,8 @@ def write_results_to_figures (directory):
     plt.figure(4)
     blue_patch = mpatches.Patch(color='blue', label='ratio')
     red_patch = mpatches.Patch(color='red', label='avg')
-    plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.9, 0.9))
-    plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_partitions, 'b-', ms=1)
+    plt.legend(handles=[red_patch, blue_patch], loc='upper left', prop={'size': 6})
+    plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_partitions, 'b.', ms=1)
     plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_partitions_avg, 'r-', ms=1)
     plt.xlabel('n')
     plt.ylabel('Ratio')
@@ -191,14 +199,29 @@ def write_results_to_figures (directory):
     plt.figure(5)
     blue_patch = mpatches.Patch(color='blue', label='ratio')
     red_patch = mpatches.Patch(color='red', label='avg')
-    plt.legend(handles=[red_patch, blue_patch], loc='upper right', bbox_to_anchor=(0.9, 0.9))
-    plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_req_primes, 'b-', ms=1)
+    plt.legend(handles=[red_patch, blue_patch], loc='upper left', prop={'size': 6})
+    plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_req_primes, 'b.', ms=1)
     plt.plot(list_nums, list_no_of_eliminated_primes_to_no_of_req_primes_avg, 'r-', ms=1)
     plt.xlabel('n')
     plt.ylabel('Ratio')
     plt.title('How many eliminated primes to required primes?')
     plt.grid(True)
     plt.savefig(directory + "/f_eliminated_primes_to_req_primes.png")
+
+    plt.figure(6)
+    r_patch = mpatches.Patch(color='red', label='% of eliminated primes')
+    b_patch = mpatches.Patch(color='blue', label='% of required primes')
+    list_of_handles = []
+    list_of_handles.append(r_patch)
+    list_of_handles.append(b_patch)
+    plt.legend(handles=list_of_handles, loc='upper left', prop={'size': 6})
+    plt.plot(list_nums, list_percentages[0], 'r-', ms=1)
+    plt.plot(list_nums, list_percentages[1], 'b-', ms=1)
+    plt.xlabel('n')
+    plt.ylabel('%')
+    plt.title('Percentages')
+    plt.grid(True)
+    plt.savefig(directory + "/f_required_eliminated_primes_percentage.png")
 
 def write_results_to_files (directory):
     global file_output_list_of_eliminated_primes, file_output_list_of_primes_in_partitions, file_output_list_of_sets_required_factors
