@@ -83,7 +83,7 @@ list_no_of_eliminated_primes_to_no_of_partitions = []
 list_no_of_eliminated_primes_to_no_of_partitions_avg = []
 list_no_of_eliminated_primes_to_no_of_req_primes = []
 list_no_of_eliminated_primes_to_no_of_req_primes_avg = []
-list_percentages = [[],[]]
+list_percentages = [[],[],[]]
 
 list_nums = []
 list_no_of_required_factors = []
@@ -135,9 +135,11 @@ def update_metrics (p, dp, num, factors):
     if no_primes > 0:
         list_percentages[0].append (int(len(list_of_eliminated_primes)/no_primes*100))
         list_percentages[1].append (int(min_lenght/no_primes*100))
+        list_percentages[2].append (100 - int(len(list_of_eliminated_primes)/no_primes*100) - int(min_lenght/no_primes*100))
     else:
         list_percentages[0].append (0)
         list_percentages[1].append (0)
+        list_percentages[2].append (100)
 
 #############################################################
 # Presentation
@@ -211,12 +213,15 @@ def write_results_to_figures (directory):
     plt.figure(6)
     r_patch = mpatches.Patch(color='red', label='% of eliminated primes')
     b_patch = mpatches.Patch(color='blue', label='% of required primes')
+    g_patch = mpatches.Patch(color='green', label='% of undecided primes')
     list_of_handles = []
     list_of_handles.append(r_patch)
     list_of_handles.append(b_patch)
+    list_of_handles.append(g_patch)
     plt.legend(handles=list_of_handles, loc='upper left', prop={'size': 6})
     plt.plot(list_nums, list_percentages[0], 'r-', ms=1)
     plt.plot(list_nums, list_percentages[1], 'b-', ms=1)
+    plt.plot(list_nums, list_percentages[2], 'g-', ms=1)
     plt.xlabel('n')
     plt.ylabel('%')
     plt.title('Percentages')
